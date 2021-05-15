@@ -1,0 +1,24 @@
+//Creaed a custom field TotalOptyAmount1__c on account object
+trigger amountoppacc on Opportunity (after delete,after update,after insert,after undelete) {
+    
+  		Set<id> accid= new Set<id>();
+		List<Account> ac1= new List<Account>();
+		for(Opportunity op3:Trigger.new)
+		{
+         accid.add(op3.AccountId);
+			}
+		List<Account> ac2= new List<Account>();
+    ac2= [select id,TotalOptyAmount1__c,(select id,Amount from Opportunities where StageName = 'Closed Won') from Account where ID =:accid];
+	for(account opn:ac2)
+	{
+	Double TotAmt=0.0;
+ 	for(Opportunity op4:opn.opportunities)
+     {
+ 		TotAmt+=op4.Amount;
+	}
+		opn.TotalOptyAmount1__c=TotAmt;
+		ac1.add(opn);
+	}
+	Update ac1;
+
+}
