@@ -1,0 +1,37 @@
+//counts the number of contacts on account when contact is insert or deleted
+trigger countcontacts on Contact  (after insert,after delete)
+{
+    Set<Id> mysetid = new Set <Id>();
+        if(Trigger.isinsert)
+        {
+           // System.debug('Insert new contact for trigger.new '+ Trigger.new);
+            for(Contact contac :trigger.new)
+                {
+                    mysetid.add(contac.Accountid);
+                }
+            List<Account> Acc = [Select Id,Number_Of_Contacts__c from Account where Id in : mysetid];
+            List<Contact> Con = [Select Id from Contact where Accountid in : mysetid];
+            for(Account A: Acc)
+                {
+                    A.Number_Of_Contacts__c = Con.size(); 
+                }
+            update Acc;
+         //   System.debug('Number of count is ' + Acc);
+        }
+    else if(Trigger.isdelete)
+        {
+       //     System.debug('The Delete Contact Name For Trigger.old'+ Trigger.Old); 
+            for(Contact contac : Trigger.Old)
+                {
+                    mysetid.add(contac.Accountid);
+                }          
+            List<Account> Acc = [Select id,Number_Of_Contacts__c from Account where id in: mysetid];
+            List<Contact> Con = [Select id from Contact where Accountid in : mysetid];          
+            for(Account A :Acc)
+                {
+                    A.Number_Of_Contacts__c = Con.size();
+                }
+                update Acc;
+         //   System.debug('The Update number is '+ Acc);
+        }
+    }
