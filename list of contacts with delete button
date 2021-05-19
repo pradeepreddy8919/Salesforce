@@ -1,0 +1,91 @@
+displays list of contacts with delete functionality
+<aura:component controller= "LightningDeleteController" implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId" access="global" >
+	
+<!-- When load the page we are calling OnLoadRecord display on App-->
+<aura:handler name="init" value="{!this}" action="{!c.OnLoadRecord}"/>
+
+<!--List data stored in attribute name which we define Contacts -->
+<aura:attribute name="Contacts" type="Contact[]"/>
+
+<!-- showing data in table you can also use div instead of table as per your need -->
+<table>
+<tr>
+<th>Action</th>
+<th>First Name</th>
+<th>Last Name</th>
+<th>Emai</th>
+</tr>
+<aura:iteration items="{!v.Contacts}" var="con">
+<tr>
+<td>
+<!-- when we click on the button row id will pass and based on this record row will delete from database -->
+<button type="button" onclick="{!c.deleteRecord}" id="{!con.Id}" class="slds-button slds-button_destructive">Delete</button>
+</td>
+<td> {!con.FirstName} </td>
+<td> {!con.LastName} </td>
+<td> {!con.Email} </td>
+</tr>
+</aura:iteration>
+</table>
+</aura:component>
+
+// component.JS
+({
+OnLoadRecord : function(component, event, helper) {
+//From OnLoadRecord i am calling helper. Helper is basically use to write all business
+      //logic so that in future we can use again and again (Reuseablity).
+helper.ContactList(component, event);
+},
+deleteRecord : function(component, event, helper) {
+//Confirm dialog when you click on delete record button it will ask you are you sure to       //delete this record
+if(confirm('Are you sure?'))
+helper.deleteAccount(component, event);
+}
+})
+
+Componentehelper.JS
+({
+	ContactList : function(component, event) {
+	var action = component.get("c.getContacts"); //Calling apex class method
+	action.setCallback(this, function(response) {
+	//Whatever result get  setting on that attribute which is mentioned in component
+	component.set("v.Contacts",response.getReturnValue());
+	});
+	$A.enqueueAction(action);
+	},
+	deleteAccount : function(component, event) {
+	var action = component.get("c.deleteContact"); //Calling Apex Method
+	action.setParams({conid:event.target.id}); // Passing the Contact Record Id
+	action.setCallback(this, function(response) {
+	component.set("v.Contacts",response.getReturnValue());
+	});
+	$A.enqueueAction(action);
+	},
+})
+
+component.CSS
+.THIS table{
+margin-left:10px;border:1px;
+}
+.THIS th, .THIS td {
+border-bottom: 1px solid #ddd;
+padding: 15px;
+}
+
+//Apexclass for above component
+public class LightningDeleteController {
+@Auraenabled
+public static List<Contact> getContacts(){
+return [Select FirstName, LastName,Email From Contact LIMIT 5];
+}
+
+@AuraEnabled
+public static List<Contact> deleteContact(String conid) {
+if(conid != null){
+Contact delContact=[Select Id from Contact where id=:conid];
+delete delContact;
+}
+//Below Query is for after delete the record again we have reload the page and show the remaning contact
+return [Select FirstName, LastName, Email From Contact LIMIT 5];
+}
+}
