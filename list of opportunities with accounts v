@@ -82,7 +82,17 @@
             });
             viewRecordEvent.fire();
         }           
-			                     
+//apex class for above component			              
+public class opplist {
+   
+   @AuraEnabled
+    public static List <Opportunity> fetchAccts() {
+       list<opportunity> opps = new list<opportunity>([select Name, Account.Name, StageName, CloseDate, Amount FROM opportunity]);
+        return opps;
+    }
+}				      
+				      
+				      
     },                      
     updateColumnSorting: function (cmp, event, helper) {
         var fieldName = event.getParam('fieldName');
