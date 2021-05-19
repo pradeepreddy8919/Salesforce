@@ -1,0 +1,35 @@
+// trigger to update account fields when contact was insert or Deleted
+trigger accountcontactinsertdelete on Contact (After insert, After delete) {
+   Set <Id> ContactId = new Set<Id>();
+    If(trigger.isinsert)
+    {      
+        for(Contact ct: trigger.new)
+        {
+            ContactId.add(ct.AccountId);            
+        }
+        If(ContactId.size()>0)
+        {
+            List<Account> aclist = [Select id, Contact_Inserted__c, Contact_Deleted__c From Account Where Id in : ContactId];         
+            for(Account a : aclist){
+            	a.Contact_Inserted__c = True;
+                a.Contact_Deleted__c = False;
+            }
+            Update aclist;
+        }       
+    }
+   else if(Trigger.isdelete){   
+        for(Contact ct1: trigger.old)
+        {
+            ContactId.add(ct1.AccountId);            
+        }
+        If(ContactId.size()>0)
+        {
+            List<Account> aclist1 = [Select id, Contact_Inserted__c, Contact_Deleted__c From Account Where id in :ContactId ];
+            for(Account at : aclist1){
+            	at.Contact_Inserted__c = False;
+                at.Contact_Deleted__c = True;
+            }
+            Update aclist1;
+        }       
+    }
+}
