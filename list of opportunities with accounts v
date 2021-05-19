@@ -1,0 +1,119 @@
+//this component displays list of opportunities with accounts c
+<aura:component controller= "opplist" implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId" access="global" > 
+   
+     <aura:attribute type="Opportunity[]" name="acctList"/>
+    <aura:attribute name="mycolumns" type="List"/>
+    <aura:attribute name="sortedBy" type="String" default="Name"/>
+    <aura:attribute name="sortedDirection" type="String" default="asc"/>  
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doinit}"/>
+    
+    <lightning:datatable data="{!v.acctList}" 
+                         columns="{!v.mycolumns}" 
+                         keyField="conid"
+                         hideCheckboxColumn="true"
+                         onsort="{!c.updateColumnSorting}"
+                         sortedBy="{!v.sortedBy}"  
+                         sortedDirection="{!v.sortedDirection}"
+                         onrowaction="{!c.viewRecord}"/>                              
+    
+</aura:component>
+
+//component.js
+({
+    doinit : function(component, event, helper) {
+           component.set('v.mycolumns', [
+            {label: 'Opportunity Name', fieldName: 'Name', type: 'text', sortable: true},
+            {label: 'Account Name', fieldName: 'AccountName', type: 'text', sortable: true},
+            {label: 'stage', fieldName: 'StageName', type: 'text', sortable: true},  
+          	 {label: 'Close Date', fieldName: 'CloseDate', type: 'text', sortable: true},  
+            {label: 'Amount', fieldName: 'Amount', type: 'text', sortable: true}, 
+               {type: "button", typeAttributes: {
+                label: 'View',
+                name: 'View',
+                title: 'View',
+                disabled: false,
+                value: 'view',
+                iconPosition: 'left'
+            }},
+               
+            {type: "button", typeAttributes: {
+                label: 'Edit',
+                name: 'Edit',
+                title: 'Edit',
+                disabled: false,
+                value: 'edit',
+                iconPosition: 'left'
+            }},
+        ]);
+        
+        var action = component.get("c.fetchAccts");
+        action.setCallback(this, function(response){
+            var state = response.getState();
+            if (state === "SUCCESS") {
+            	var rows = response.getReturnValue();              
+                for ( var i = 0; i < rows.length; i++ ) {                   
+                    var row = rows[i];                   
+                    if ( row.Account ) {
+                        row.AccountName = row.Account.Name;
+                    }                                                     
+                }
+                component.set("v.acctList", rows);
+                helper.sortData(component, component.get("v.sortedBy"), component.get("v.sortedDirection"));
+            }
+        });
+        $A.enqueueAction(action);
+    },
+
+        viewRecord : function(component, event, helper) {
+        var recId = event.getParam('row').Id;
+        var actionName = event.getParam('action').name;
+        if ( actionName == 'Edit' ) {           
+            var editRecordEvent = $A.get("e.force:editRecord");
+            editRecordEvent.setParams({
+                "recordId": recId
+            });
+            editRecordEvent.fire();
+        }                                                         
+         else if ( actionName == 'View') {          
+            var viewRecordEvent = $A.get("e.force:navigateToURL");
+            viewRecordEvent.setParams({
+                "url": "/" + recId
+            });
+            viewRecordEvent.fire();
+        }           
+			                     
+    },                      
+    updateColumnSorting: function (cmp, event, helper) {
+        var fieldName = event.getParam('fieldName');
+        var sortDirection = event.getParam('sortDirection');
+        cmp.set("v.sortedBy", fieldName);
+        cmp.set("v.sortedDirection", sortDirection);
+        helper.sortData(cmp, fieldName, sortDirection);
+    }
+})
+
+//componetshelper.JS
+({
+    sortData: function (cmp, fieldName, sortDirection) {
+        var data = cmp.get("v.acctList");
+        var reverse = sortDirection !== 'asc';
+        data.sort(this.sortBy(fieldName, reverse))
+        cmp.set("v.acctList", data);
+    },
+    
+    sortBy: function (field, reverse, primer) {
+        var key = primer ?
+            function(x) {return primer(x[field])} :
+        function(x) {return x[field]};
+        reverse = !reverse ? 1 : -1;
+        return function (a, b) {
+            return a = key(a), b = key(b), reverse * ((a > b) - (b > a));
+        }
+    },
+    
+		
+})
+
+
+
