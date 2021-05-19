@@ -10,7 +10,7 @@
 			<apex:column value="{!key.AccountNumber}"/>
 			<apex:column value="{!key.Type}"/>	
 		</apex:pageBlockTable>
-	</apex:pageBlock> a
+	</apex:pageBlock>
 </apex:page>
 
 // apex class for above vf page
