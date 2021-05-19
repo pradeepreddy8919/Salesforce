@@ -1,0 +1,36 @@
+<!-- fetch account recordsin visualforce page using Restapi -->
+<apex:page controller="vfapex">
+ 	<apex:sectionHeader title="Accounts" subtitle="List View"/>
+	<apex:pageBlock >
+			<apex:pageBlockTable value="{!acc}" var="key">
+					<apex:column >
+				<apex:facet name="header">Account Name</apex:facet>
+				<apex:outputLink value="/{!key.Id}">{!key.Name}</apex:outputLink>
+			</apex:column>
+			<apex:column value="{!key.AccountNumber}"/>
+			<apex:column value="{!key.Type}"/>	
+		</apex:pageBlockTable>
+	</apex:pageBlock> a
+</apex:page>
+
+// apex class for above vf page
+public with sharing class vfapex {
+    public list<account> acc{get{
+    	//Define http Request 
+    	//append your Query to the base url
+    	HttpRequest req = new HttpRequest();
+        req.setEndpoint('https://'+URL.getSalesforceBaseUrl().getHost()+'/services/data/v39.0/query/?q=SELECT+Id,Name,AccountNumber,Type+FROM+Account+limit+10');
+        req.setMethod('GET');       
+        //Get SessionId
+        string autho = 'Bearer '+userInfo.getSessionId();
+        req.setHeader('Authorization', autho);        
+        //Get Response
+        Http http = new Http();
+        HTTPresponse res= http.send(req);
+        string response = res.getBody();        
+        //Deserialize obtained json response
+        string str = '['+ response.substring(response.indexOf('records":[')+10,response.indexof(']}')) +']';
+        acc = (list<Account>)JSON.deserialize(str,list<Account>.class);        
+        return acc;    
+    }set;}    
+}
