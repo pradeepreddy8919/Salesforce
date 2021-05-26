@@ -1,0 +1,29 @@
+<aura:application extends="force:slds">
+   
+	
+ 
+<c:Registration_Component />    <!--
+<div> 
+    
+        This text is from application level markup. 
+    
+    </div>
+    
+     Call the components 
+    <c:Welcome_to_Lightning />
+    <c:Welcome_to_Lightning displayText="Text2" />
+    <c:Welcome_to_Lightning displayText="Text3" />
+    <c:Welcome_to_Lightning displayText="Text4" />
+    -->
+    <aura:attribute name="OpenRegistrationForm" type="Boolean" default="true" />
+    <aura:attribute name="ButtonLabel" type="String" default="Open Registration Form" />
+    <!--
+    <lightning:button label="{!v.ButtonLabel}" onclick="{!c.openORcloseRegistrationForm}" />
+   
+    <aura:if isTrue="{!v.OpenRegistrationForm}">
+    <c:Registration_Component />
+  </aura:if>
+     -->
+    
+
+</aura:application>

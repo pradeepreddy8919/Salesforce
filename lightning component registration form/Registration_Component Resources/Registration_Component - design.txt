@@ -1,0 +1,12 @@
+<design:component label="My Registration Component">
+	
+    
+    
+    <design:attribute name="PageHeading" label="Page Heading" datasource="Registration Form for Students,Registration Form for Girls,Registration Form for Boys"  description="Give your page Heading here" > 
+    
+    </design:attribute>
+    
+    
+        
+    
+</design:component>
