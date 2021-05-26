@@ -1,0 +1,34 @@
+({
+	forwardLPComplaint : function(component, event, helper) {
+         // fire the component event, below are the steps involved
+         
+         // 1. get a reference to our component event
+		var LPCEvent = component.getEvent("LowPriorityComplaintFromTownship1");
+        // 2. set the attribute value
+        LPCEvent.setParams({"complaintMessage":"Township 2 is not behaving properly."});
+        //3. fire the event
+        LPCEvent.fire();              
+	},
+    
+	forwardMPComplaint : function(component, event, helper) {
+         // fire the component event, below are the steps involved
+         
+         // 1. get a reference to our component event
+		var MPCEvent = component.getEvent("MediumPriorityComplaintFromTownship1");
+        // 2. set the attribute value 
+        MPCEvent.setParams({"complaintMessage":"Township 2 is dumping waste in Township 1."});
+        //3. fire the event
+        MPCEvent.fire();              
+	},
+    
+	forwardHPComplaint : function(component, event, helper) {
+         // fire the component event, below are the steps involved
+         
+         // 1. get a reference to our component event
+		var HPCEvent = component.getEvent("HighPriorityComplaintFromTownship1");
+        // 2. set the attribute value
+        HPCEvent.setParams({"complaintMessage":"Township 2 is contaminating water supplied to Township 1."});
+        //3. fire the event
+        HPCEvent.fire();              
+	}
+})

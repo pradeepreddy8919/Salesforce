@@ -1,0 +1,38 @@
+({
+	handlingLowPComplaints : function(component, event, helper) {
+		console.log("LP Message Received at District Level");
+        // read the attribute value in the component event
+        var MessageReceived = event.getParam("complaintMessage");
+        console.log(MessageReceived);
+	},
+    
+    handlingMediumPComplaints : function(component, evt, helper) {
+		console.log("MP Message Received at District Level");
+        // read the attribute value in the component event
+        var MessageReceived = evt.getParam("complaintMessage");
+        console.log(MessageReceived);
+        var EvtSourceInfo = evt.getSource();
+        var SourceComponentName = evt.getSource().getName();
+        console.log(SourceComponentName);
+        if(SourceComponentName === "cS1D1Township1"){
+            evt.pause();
+            //ANALYSIS --> outcome is "can't be resolved" so resume event propagation
+            //evt.stopPropagation();
+            evt.resume();
+        }
+        
+	},
+    
+      handlingHighPComplaints : function(component, evt, helper) {
+		console.log("HP Message Received at District Level");
+        // read the attribute value in the component event
+        var MessageReceived = evt.getParam("complaintMessage");
+        console.log(MessageReceived);
+        var EvtSourceInfo = evt.getSource();
+        var SourceComponentName = evt.getSource().getName();
+        console.log(SourceComponentName);
+                
+	}
+    
+    
+})

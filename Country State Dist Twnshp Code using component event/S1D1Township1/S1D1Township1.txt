@@ -1,0 +1,18 @@
+<aura:component >
+	
+     <p>
+    This text is from State 1 District 1 Township1 .
+    </p>
+    
+    <aura:registerEvent name="LowPriorityComplaintFromTownship1" type="c:ComponentEventWithComplaintMsg" />
+    
+    <aura:registerEvent name="MediumPriorityComplaintFromTownship1" type="c:ComponentEventWithComplaintMsg" />
+    
+    <aura:registerEvent name="HighPriorityComplaintFromTownship1" type="c:ComponentEventWithComplaintMsg" />
+    
+    
+    <lightning:button  label="Submit My LP Complaints" aura:id="LPB" name="LPComplaintB" onclick="{!c.forwardLPComplaint}" />
+    <lightning:button  label="Submit My MP Complaints" aura:id="MPB" name="MPComplaintB" onclick="{!c.forwardMPComplaint}" />
+    <lightning:button  label="Submit My HP Complaints" aura:id="HPB" name="HPComplaintB" onclick="{!c.forwardHPComplaint}" />
+
+</aura:component>

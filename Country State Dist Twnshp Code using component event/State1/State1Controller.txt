@@ -1,0 +1,20 @@
+({
+	 handlingMediumPComplaints : function(component, event, helper) {
+		console.log("MP Message Received at State Level");
+        // read the attribute value in the component event
+        var MessageReceived = event.getParam("complaintMessage");
+        console.log(MessageReceived);
+	},
+    
+     handlingHighPComplaints : function(component, evt, helper) {
+		console.log("HP Message Received at State Level");
+        // read the attribute value in the component event
+        var MessageReceived = evt.getParam("complaintMessage");
+        console.log(MessageReceived);
+        var EvtSourceInfo = evt.getSource();
+        var SourceComponentName = evt.getSource().getName();
+        console.log(SourceComponentName);
+       
+        
+	},
+})

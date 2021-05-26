@@ -1,0 +1,20 @@
+<aura:application extends="force:slds">
+    
+<p>
+    This text is from Country (Application Level).
+</p>
+     <aura:handler name="HighPriorityComplaintFromTownship1" event="c:ComponentEventWithComplaintMsg" action="{!c.handlingHighPComplaints}" phase="capture" />
+    
+    <p>
+        <c:State1/>
+        
+    </p>
+    
+    <!--
+    <p>
+        <c:State2/>
+        
+    </p>
+    -->
+    
+</aura:application>
