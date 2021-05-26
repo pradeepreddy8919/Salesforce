@@ -1,0 +1,11 @@
+<aura:component controller="contactSearchController">
+    
+    <aura:attribute name="searchTerm" type="String" />
+    
+    <aura:registerEvent name="contactSearchComplete" type="c:contactSearchCompleteEvent"/>
+    
+	<lightning:input type="Text" label="Enter Contact Name" aura:id="searchTerm" value="{!v.searchTerm}"/>
+    
+	<lightning:button label="Search" onclick="{!c.doSearch}" />
+    
+</aura:component>

@@ -1,0 +1,14 @@
+<aura:component >
+	
+    <aura:attribute name="contacts" type="Contact[]" />
+   
+    <li>Available Contacts are </li>
+    
+   <ul>
+      <aura:iteration items="{!v.contacts}" var="con">
+         <li type="dice">ContactName : {!con.Name}</li>
+             <hr/>
+      </aura:iteration>
+   </ul>
+    
+</aura:component>
