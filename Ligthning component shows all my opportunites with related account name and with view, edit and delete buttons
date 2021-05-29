@@ -1,40 +1,41 @@
-//this component displays list of opportunities with accounts c
-<aura:component controller= "opplist" implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId" access="global" > 
-   
-     <aura:attribute type="Opportunity[]" name="acctList"/>
+// Ligthning component shows all my opportunites with related account name and with view, edit and delete buttons
+
+<aura:component controller= "opplist" implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId" access="global" >    
+     <aura:attribute type="Opportunity[]" name="oppList"/>
     <aura:attribute name="mycolumns" type="List"/>
     <aura:attribute name="sortedBy" type="String" default="Name"/>
     <aura:attribute name="sortedDirection" type="String" default="asc"/>  
     
     <aura:handler name="init" value="{!this}" action="{!c.doinit}"/>
-    
-    <lightning:datatable data="{!v.acctList}" 
+    <div style="Height: 300px;">
+    <lightning:datatable data="{!v.oppList}" 
                          columns="{!v.mycolumns}" 
-                         keyField="conid"
+                         keyField="id"
                          hideCheckboxColumn="true"
                          onsort="{!c.updateColumnSorting}"
                          sortedBy="{!v.sortedBy}"  
                          sortedDirection="{!v.sortedDirection}"
                          onrowaction="{!c.viewRecord}"/>                              
-    
+    </div>
 </aura:component>
 
-//component.js
+controller.JS
+
 ({
     doinit : function(component, event, helper) {
            component.set('v.mycolumns', [
-            {label: 'Opportunity Name', fieldName: 'Name', type: 'text', sortable: true},
-            {label: 'Account Name', fieldName: 'AccountName', type: 'text', sortable: true},
+            {label: 'Opportunity', fieldName: 'Name', type: 'text', sortable: true},
+            {label: 'Account', fieldName: 'AccountName', type: 'text', sortable: true},
             {label: 'stage', fieldName: 'StageName', type: 'text', sortable: true},  
           	 {label: 'Close Date', fieldName: 'CloseDate', type: 'text', sortable: true},  
             {label: 'Amount', fieldName: 'Amount', type: 'text', sortable: true}, 
-               {type: "button", typeAttributes: {
+            {type: "button", typeAttributes: {
                 label: 'View',
                 name: 'View',
                 title: 'View',
                 disabled: false,
                 value: 'view',
-                iconPosition: 'left'
+                iconPosition: 'center'
             }},
                
             {type: "button", typeAttributes: {
@@ -43,9 +44,18 @@
                 title: 'Edit',
                 disabled: false,
                 value: 'edit',
-                iconPosition: 'left'
+               iconPosition: 'center'
             }},
+               {type: "button", typeAttributes: {
+                label: 'Delete',
+                name: 'Delete',
+                title: 'Delete',
+                disabled: false,
+                value: 'delete',
+                iconPosition: 'center'
+            }}
         ]);
+        
         
         var action = component.get("c.fetchAccts");
         action.setCallback(this, function(response){
@@ -58,7 +68,7 @@
                         row.AccountName = row.Account.Name;
                     }                                                     
                 }
-                component.set("v.acctList", rows);
+                component.set("v.oppList", rows);
                 helper.sortData(component, component.get("v.sortedBy"), component.get("v.sortedDirection"));
             }
         });
@@ -81,18 +91,15 @@
                 "url": "/" + recId
             });
             viewRecordEvent.fire();
-        }           
-//apex class for above component			              
-public class opplist {
-   
-   @AuraEnabled
-    public static List <Opportunity> fetchAccts() {
-       list<opportunity> opps = new list<opportunity>([select Name, Account.Name, StageName, CloseDate, Amount FROM opportunity]);
-        return opps;
-    }
-}				      
-				      
-				      
+        } else if ( actionName == 'Delete')
+        {		//alert(recId); 
+            if(confirm('Are you sure?')){
+                
+             helper.deleteAccount(component, event);         
+	
+            }
+        }
+			                     
     },                      
     updateColumnSorting: function (cmp, event, helper) {
         var fieldName = event.getParam('fieldName');
@@ -103,13 +110,16 @@ public class opplist {
     }
 })
 
-//componetshelper.JS
+
+
+helper.JS
+
 ({
     sortData: function (cmp, fieldName, sortDirection) {
-        var data = cmp.get("v.acctList");
+        var data = cmp.get("v.oppList");
         var reverse = sortDirection !== 'asc';
         data.sort(this.sortBy(fieldName, reverse))
-        cmp.set("v.acctList", data);
+        cmp.set("v.oppList", data);
     },
     
     sortBy: function (field, reverse, primer) {
@@ -121,9 +131,37 @@ public class opplist {
             return a = key(a), b = key(b), reverse * ((a > b) - (b > a));
         }
     },
+    deleteAccount : function(component, event) {
+	 var recId = event.getParam('row').Id;
+      var action = component.get("c.deleteopportunity"); //Calling Apex Method
+        action.setParams({recId:recId}); // Passing the Contact Record Id
+		action.setCallback(this, function(response) {
+            var state = response.getState();
+            if (state === "SUCCESS"){
+	//	component.set("v.oppList",response.getReturnValue());  
+            var rows1 = response.getReturnValue();              
+                for ( var i = 0; i < rows1.length; i++ ) {                   
+                    var row1 = rows1[i];                   
+                    if ( row1.Account ) {
+                        row1.AccountName = row1.Account.Name;
+                    }                                                     
+                }
+                component.set("v.oppList", rows1)          
+        var toastEvent = $A.get("e.force:showToast");
+        toastEvent.setParams({
+        title : 'Success',
+        message: 'Opportunity was deleted',
+        duration:' 5000',
+            key: 'info_alt',
+            type: 'success',
+            mode: 'pester'
+        });
+        toastEvent.fire();
+            }
     
+                //console.log(response.getReturnValue());
+    });
+	$A.enqueueAction(action);
+	},
 		
 })
-
-
-
