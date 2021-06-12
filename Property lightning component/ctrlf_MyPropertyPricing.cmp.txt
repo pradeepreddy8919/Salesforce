@@ -1,0 +1,165 @@
+Sample code for Property Pricing Details component
+===================ctrlf_MyPropertyPricing.cmp================
+
+<aura:component implements="flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+
+<aura:attribute name="property" type="Property__c"></aura:attribute>
+
+    <lightning:layout multipleRows="true">
+
+        <div style="margin-top:2%">
+
+            <lightning:formattedrichtext style="color:brown;font-weight:bold" value="{!v.property.Property_Description__c}"></lightning:formattedrichtext>
+
+         </div>
+
+        <div class="slds-box slds-grid slds-wrap slds-p-around_small" style="margin-top:2%;width:100%">
+
+        <div class="slds-col">
+
+            <lightning:layout multipleRows="true">
+
+                <lightning:layoutItem padding="around-small">
+
+                    <div class="header-column">
+
+                        <p class="field-title" title="Rental Value">Rental Value</p>
+
+                            <p>{!v.property.Rent__c}</p>
+
+                        </div>
+
+                   
+
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem padding="around-small">
+
+                    <div class="header-column">
+
+                        <p class="field-title" title="Security Deposit">Security Deposit</p>
+
+                            <p>{!v.property.Security_Deposit__c}</p>
+
+                        </div>
+
+                   
+
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem padding="around-small">
+
+                    <div class="header-column">
+
+                        <p class="field-title" title="Maintainance Charge">Maintainance Charge</p>
+
+                            <p>{!v.property.Maintainance_Charge__c}</p>
+
+                        </div>
+
+                   
+
+                    </lightning:layoutItem>
+
+                </lightning:layout>
+
+            </div>
+
+        </div>
+
+    </lightning:layout>
+
+</aura:component>
+
+
+
+==============CSS==============
+
+.THIS {
+
+    background-color:azure;
+
+    border:1px solid #d8dde6;
+
+    margin:10px 0 20px 0;
+
+}
+
+.THIS .header-column{
+
+    padding: 0 2rem;
+
+}
+
+.THIS .field-title{
+
+    color:brown;
+
+    font-size: .75rem;
+
+    margin-bottom:.25rem;
+
+    line-height: 1.25rem;
+
+}
+
+
+
+======================ctrlf_MyPropertyMasterTab===================
+
+<aura:component controller="PropertyDetais" implements="lightning:isUrlAddressable, flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+
+    <aura:attribute name="propertyId" type="String"></aura:attribute>
+
+    <aura:attribute name="property" type="Property__c"></aura:attribute>
+
+    <aura:attribute name="propertyFound" type="boolean" default="false"></aura:attribute>
+
+    <aura:handler name="init" value="{!this}" action="{!c.getSelectedProperty}"></aura:handler>
+
+    <lightning:tabset variant="scoped">
+
+        <lightning:tab label="Property Details">
+
+           
+
+        </lightning:tab>
+
+        <lightning:tab label="Pricing Details">
+
+            <div class="slds-p-around_medum" >
+
+              <c:ctrlf_MyPropertyPricing property="{!v.property}"></c:ctrlf_MyPropertyPricing>   
+
+            </div>
+
+        </lightning:tab>
+
+       
+
+        <lightning:tab label="Onwer Details">
+
+            <aura:if isTrue="{!v.propertyFound}">
+
+                <div class="slds-p-around_medum" style="background-color:azure">
+
+                    <c:ctrlf_MyPropertyOwner propertyOwnerId="{!v.property.Property_Owner__c}"></c:ctrlf_MyPropertyOwner>
+
+                </div>
+
+            </aura:if>
+
+        </lightning:tab>
+
+       
+
+        <lightning:tab label="Property Video">
+
+           
+
+        </lightning:tab>
+
+    </lightning:tabset>
+
+</aura:component>
+

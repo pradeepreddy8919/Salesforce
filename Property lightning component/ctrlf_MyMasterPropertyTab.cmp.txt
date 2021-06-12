@@ -1,0 +1,454 @@
+Sample code for Create Master property Tab and use lightning navigation
+=============ctrlf_MyMasterPropertyTab.cmp===============
+
+<aura:component implements="lightning:isUrlAddressable, flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+
+<aura:attribute name="propertyId" type="String"></aura:attribute>
+
+   
+
+    <lightning:tabset variant="scoped">
+
+        <lightning:tab label="Property Details">
+
+       
+
+        </lightning:tab>
+
+         <lightning:tab label="Pricing Details">
+
+       
+
+        </lightning:tab>
+
+       
+
+         <lightning:tab label="Onwer Details">
+
+       
+
+        </lightning:tab>
+
+       
+
+         <lightning:tab label="Property Video">
+
+       
+
+        </lightning:tab>
+
+    </lightning:tabset>
+
+</aura:component>
+
+==================ctrlf_MyPropertyResult===================
+
+<aura:component controller="PropertyDetais" implements="flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+
+    <aura:attribute name="propertyList" type="Property__c[]"></aura:attribute>
+
+    <aura:attribute name="propertiesFound" type="boolean" default="false"></aura:attribute>
+
+    <aura:attribute name="openOwnerDetails" type="boolean" default="false"></aura:attribute>
+
+    <aura:attribute name="propOwnerId" type="string"></aura:attribute>
+
+    <aura:attribute name="openEnquieryDetails" type="boolean" default="false"></aura:attribute>
+
+    <aura:attribute name="propertyId" type="string"></aura:attribute>
+
+    <aura:handler name="init" value="{!this}" action="{!c.fetchAllProperty}"/>
+
+    <lightning:navigation aura:id="navService"></lightning:navigation>
+
+    <aura:attribute name="pageReference" type="object"></aura:attribute>
+
+    <aura:attribute name="url" type="string"></aura:attribute>
+
+    <aura:if isTrue="{!v.propertiesFound}">
+
+        <lightning:layout multipleRows="true">
+
+            <aura:iteration items="{!v.propertyList}" var="prop">
+
+                <lightning:layoutItem padding="around-small" size="6">
+
+                    <lightning:layout multipleRows="true">
+
+                        <div class="slds-box" style="width:100%;background-color:white;">
+
+                            <lightning:layout>
+
+                                <lightning:layoutItem size="4" padding="around-small">
+
+                                    <lightning:formattedRichText value="{!prop.Property_Main_Image__c}"></lightning:formattedRichText>
+
+                                </lightning:layoutItem>
+
+                                <lightning:layoutItem size="8" padding="around-small">
+
+                                    <lightning:card title="{!prop.Furnished_Type__c}">
+
+                                        <lightning:layoutItem size="12">
+
+                                            <p style="color:red;">INR:{!prop.Rent__c}</p>
+
+                                        </lightning:layoutItem>
+
+                                        <lightning:layoutItem size="12">
+
+                                            <p >{!prop.No_Of_Bed_Room__c} BHK house for Rent {!prop.Coverd_area_sqft__c} sqft.</p>
+
+                                        </lightning:layoutItem>
+
+                                        <lightning:layoutItem size="12">
+
+                                            <p >{!prop.Area__c}</p>
+
+                                        </lightning:layoutItem>
+
+                                        <lightning:layoutItem size="12">
+
+                                            <p >{!prop.No_Of_Bed_Room__c} Room {!prop.No_Of_Bath_Room__c} Bathroom {!prop.Furnished_Type__c}</p>
+
+                                        </lightning:layoutItem>
+
+                                       
+
+                                    </lightning:card>
+
+                                    <div class="slds-p-top_small">
+
+                                        <lightning:buttonGroup>
+
+                                            <lightning:button class="btnStyle"  variant="success" label="Owner Details"
+
+                                                              value="{!prop.Property_Owner__c}" onclick="{!c.ownerDetailsClick}"></lightning:button>
+
+                                           
+
+                                            <lightning:button class="btnStyle"  variant="success" label="Enquiery"
+
+                                                              value="{!prop.Id}" onclick="{!c.feedbackClicked}"></lightning:button>
+
+                                           
+
+                                            <lightning:button class="btnStyle"  variant="success" label="Property Details"
+
+                                                              value="{!prop.Id}" onclick="{!c.NavigateToPropDetails}"></lightning:button>
+
+                                           
+
+                                        </lightning:buttonGroup>
+
+                                    </div>
+
+                                </lightning:layoutItem>
+
+                               
+
+                            </lightning:layout>                           
+
+                        </div>
+
+                    </lightning:layout>
+
+                </lightning:layoutItem>
+
+            </aura:iteration>
+
+        </lightning:layout>
+
+        <aura:set attribute="else">
+
+            <span>Properties are not listed yet as per your selection. Please stay tune to future listing.</span>
+
+        </aura:set>
+
+    </aura:if>
+
+   
+
+    <!-- Owner details section start -->
+
+    <aura:if isTrue="{!v.openOwnerDetails}">
+
+        <div style="margin-top:5%">
+
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+
+                <div class="slds-modal__container">
+
+                    <header class="slds-modal__header">
+
+                        <lightning:card title="Property Owner Detaisl" iconName="standard:people">
+
+                            <lightning:buttonIcon  class="slds-modal__close" iconName="utility:close"
+
+                                                  onclick="{!c.closeOwnerModal}"></lightning:buttonIcon>
+
+                        </lightning:card>
+
+                    </header>
+
+                    <div class="slds-modal__content slds-p-around_medium" >
+
+                        <c:ctrlf_MyPropertyOwner propertyOwnerId="{!v.propOwnerId}"></c:ctrlf_MyPropertyOwner>   
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </aura:if>
+
+    <!-- Owner details section end -->
+
+   
+
+    <!-- Property Enquiery section start-->
+
+    <aura:if isTrue="{!v.openEnquieryDetails}">
+
+        <div style="margin-top:5%">
+
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+
+              <div class="slds-modal__container">
+
+                <header class="slds-modal__header">
+
+                    <lightning:buttonIcon  class="slds-modal__close" iconName="utility:close"
+
+                                                  onclick="{!c.closeEnquieryModal}"></lightning:buttonIcon>
+
+                    </header>
+
+                    <div class="slds-modal__content slds-p-around_medium" >
+
+                    <c:ctrlf_MyPropertyEnquiery propertyId="{!v.propertyId}"></c:ctrlf_MyPropertyEnquiery>
+
+                    </div>
+
+                </div>
+
+            </section>   
+
+        </div>
+
+    </aura:if>
+
+   
+
+   
+
+   
+
+</aura:component>
+
+=========================Ctrlf_MyPropertyResult Controller==============
+
+({
+
+    fetchAllProperty : function(component, event, helper) {
+
+        helper.fetchAllPropertyHelper(component, event, helper);
+
+    },
+
+    ownerDetailsClick : function(component, event, helper) {
+
+        var eventSource = event.getSource();
+
+        var propOwnerId = eventSource.get('v.value');
+
+        component.set('v.propOwnerId',propOwnerId);
+
+        component.set('v.openOwnerDetails',"true"); 
+
+       
+
+    },
+
+    closeOwnerModal : function(component, event, helper) {
+
+        component.set('v.openOwnerDetails',"false");   
+
+    },
+
+    feedbackClicked : function(component, event, helper) {
+
+        var eventSource = event.getSource();
+
+        var propId = eventSource.get('v.value');
+
+        component.set('v.propertyId',propId);
+
+        component.set('v.openEnquieryDetails',"true");     
+
+    },
+
+    closeEnquieryModal : function(component, event, helper) {
+
+        component.set('v.openEnquieryDetails',"false");   
+
+    },
+
+    NavigateToPropDetails : function(component, event, helper) {
+
+        var navService = component.find("navService");
+
+        var eventSource = event.getSource();
+
+        var propId = eventSource.get('v.value');
+
+        console.log('NavigateToPropDetails propId'+propId);
+
+        var pageReference = {
+
+            type: "standard__component",
+
+            attributes:{
+
+                componentName:"c__ctrlf_MyMasterPropertyTab"
+
+            },
+
+            state:{
+
+                "c__propertyId":propId
+
+            }
+
+        };
+
+         console.log('NavigateToPropDetails pageReference'+pageReference);
+
+        component.set("v.pageReference",pageReference);
+
+         console.log('NavigateToPropDetails pageReference'+JSON.stringify(pageReference));
+
+        navService.navigate(pageReference);
+
+    }
+
+})
+
+
+
+
+Sample code for Server side call with parameter to get selected property
+=======================ctrlf_MyMasterPropertyTab.cmp===================
+
+
+
+<aura:component controller="PropertyDetais" implements="lightning:isUrlAddressable, flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+
+<aura:attribute name="propertyId" type="String"></aura:attribute>
+
+    <aura:attribute name="property" type="Property__c"></aura:attribute>
+
+    <aura:attribute name="propertyFound" type="boolean" default="false"></aura:attribute>
+
+    <aura:handler name="init" value="{!this}" action="{!c.getSelectedProperty}"></aura:handler>
+
+    <lightning:tabset variant="scoped">
+
+        <lightning:tab label="Property Details">
+
+       
+
+        </lightning:tab>
+
+         <lightning:tab label="Pricing Details">
+
+       
+
+        </lightning:tab>
+
+       
+
+         <lightning:tab label="Onwer Details">
+
+        <aura:if isTrue="{!v.propertyFound}">
+
+            <div class="slds-p-around_medum" style="background-color:azure">
+
+                <c:ctrlf_MyPropertyOwner propertyOwnerId="{!v.property.Property_Owner__c}"></c:ctrlf_MyPropertyOwner>
+
+                </div>
+
+             </aura:if>
+
+        </lightning:tab>
+
+       
+
+         <lightning:tab label="Property Video">
+
+       
+
+        </lightning:tab>
+
+    </lightning:tabset>
+
+</aura:component>
+
+
+
+================controller=============
+
+({
+
+getSelectedProperty : function(component, event, helper) {
+
+helper.getproertyDetails(component, event, helper);
+
+}
+
+})
+
+====================helper==============
+
+({
+
+getproertyDetails : function(component, event, helper) {
+
+        var pageReference = component.get("v.pageReference");
+
+        console.log('getproertyDetails pageReference'+JSON.stringify(pageReference));
+
+        var pid = pageReference.state.c__propertyId;
+
+         console.log('getproertyDetails pageReference pid'+pid);
+
+var action = component.get('c.getDetails');
+
+        action.setParams({
+
+            'propId':pid
+
+        });
+
+        action.setCallback(this,function(response){
+
+        var state = response.getState();
+
+            var responseValue= response.getReturnValue();
+
+            component.set('v.property',responseValue);
+
+             component.set('v.propertyFound',true);
+
+        });
+
+        $A.enqueueAction(action,false);
+
+}
+
+})
+
+

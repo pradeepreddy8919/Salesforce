@@ -1,0 +1,81 @@
+Sample code for Creating component to play the property video
+================ctrlf_MyPropertyVideo.cmp=============
+
+<aura:component implements="flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+
+<aura:attribute name="property" type="property__c">
+
+    </aura:attribute>
+
+    <iframe width="1200" height="455" src="{!v.property.Property_Video_URL__c}" allowfullscreen="true"></iframe>
+
+</aura:component>
+
+
+
+=====================ctrlf_MyMasterPropertyTab.cmp=============
+
+<aura:component controller="PropertyDetais" implements="lightning:isUrlAddressable, flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+
+    <aura:attribute name="propertyId" type="String"></aura:attribute>
+
+    <aura:attribute name="property" type="Property__c"></aura:attribute>
+
+    <aura:attribute name="propertyFound" type="boolean" default="false"></aura:attribute>
+
+    <aura:handler name="init" value="{!this}" action="{!c.getSelectedProperty}"></aura:handler>
+
+    <lightning:tabset variant="scoped">
+
+        <lightning:tab label="Property Details">
+
+           
+
+        </lightning:tab>
+
+        <lightning:tab label="Pricing Details">
+
+            <div class="slds-p-around_medum" >
+
+              <c:ctrlf_MyPropertyPricing property="{!v.property}"></c:ctrlf_MyPropertyPricing>   
+
+            </div>
+
+        </lightning:tab>
+
+       
+
+        <lightning:tab label="Onwer Details">
+
+            <aura:if isTrue="{!v.propertyFound}">
+
+                <div class="slds-p-around_medum" style="background-color:azure">
+
+                    <c:ctrlf_MyPropertyOwner propertyOwnerId="{!v.property.Property_Owner__c}"></c:ctrlf_MyPropertyOwner>
+
+                </div>
+
+            </aura:if>
+
+        </lightning:tab>
+
+       
+
+        <lightning:tab label="Property Video">
+
+            <aura:if isTrue="{!v.propertyFound}">
+
+                <div class="slds-p-around_medum" style="background-color:azure">
+
+                   <c:ctrlf_MyPropertyVideo property="{!v.property}"></c:ctrlf_MyPropertyVideo>
+
+                </div>
+
+            </aura:if>
+
+        </lightning:tab>
+
+    </lightning:tabset>
+
+</aura:component>
+

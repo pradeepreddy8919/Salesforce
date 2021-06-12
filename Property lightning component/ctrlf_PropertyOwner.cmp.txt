@@ -1,0 +1,66 @@
+
+
+
+
+
+=================ctrlf_PropertyOwner.cmp====================
+
+
+
+<aura:component implements="flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+
+<aura:attribute name="propertyOwnerId" type="string"></aura:attribute>
+
+    <lightning:recordViewForm recordId="{!v.propertyOwnerId}" objectApiName="Property_Owner__c">
+
+        <lightning:layout>
+
+        <div class="slds-box slds-grid slds-wrap slds-p-arond_small">
+
+            <div class="slds-col" style="margin-top:2%;width:10%">
+
+                <lightning:outputField fieldName="Owner_Photo__c" variant="label-hidden"></lightning:outputField>
+
+                </div>
+
+                <div class="slds-col" style="margin-left:4%;">
+
+                <lightning:layoutItem>
+
+                    <lightning:outputField style="color:brown;font-weight:bold;" fieldName="Owner_Name__c" variant="label-hidden"></lightning:outputField>
+
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem>
+
+                    <lightning:outputField style="color:brown;font-weight:bold;" fieldName="Email__c" variant="label-hidden"></lightning:outputField>
+
+                    </lightning:layoutItem>
+
+                     <lightning:layoutItem>
+
+                    <lightning:outputField style="color:brown;font-weight:bold;" fieldName="Owner_Phone__c" variant="label-hidden"></lightning:outputField>
+
+                    </lightning:layoutItem>
+
+                    <lightning:layoutItem>
+
+                    <lightning:outputField style="color:brown;font-weight:bold;" fieldName="Owner_Address__c" variant="label-hidden"></lightning:outputField>
+
+                    </lightning:layoutItem>
+
+                </div>
+
+            </div>
+
+        </lightning:layout>
+
+   
+
+    </lightning:recordViewForm>
+
+</aura:component>
+
+Fullscreen
+Go to Previous lecture15. Create Property Owner Component using LDS Reco…
+Go to Next lecture17. Component composition- property owner componen…

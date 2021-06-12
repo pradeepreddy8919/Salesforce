@@ -1,0 +1,336 @@
+Sample code for Creating Property Details Component to display property
+
+
+=======================ctrlf_MyPropertyDetails.cmp=========================================
+
+<aura:component implements="flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+
+    <aura:attribute name="property" type="property__c"></aura:attribute>
+
+    <lightning:layout multipleRows="true">
+
+        <div style="margin-top:2%">
+
+            <lightning:formattedRichtext value="{!v.property.Property_Description__c}"
+
+                                         style="color:brown;font-weight:bold"></lightning:formattedRichtext>
+
+        </div>
+
+        <div class="slds-box slds-grid slds-wrap slds-p-around_small" style="margin-top:2%;width:100%;">
+
+            <div class="slds-col">
+
+                <lightning:formattedRichText value="{!v.property.Property_Main_Image__c}"></lightning:formattedRichText>
+
+            </div>
+
+            <div class="slds-col">
+
+                <div class="slds-col slds-border_bottom">
+
+                    <lightning:layout multipleRows="true">
+
+                        <lightning:layoutItem padding="around-small">
+
+                            <div class="header-column">
+
+                                <p class="field-title" title="BedRooms">BedRooms</p>
+
+                                <p>{!v.property.No_Of_Bed_Room__c}</p>
+
+                            </div>
+
+                        </lightning:layoutItem>
+
+                        <lightning:layoutItem padding="around-small">
+
+                            <div class="header-column">
+
+                                <p class="field-title" title="BathRooms">BathRooms</p>
+
+                                <p>{!v.property.No_Of_Bath_Room__c}</p>
+
+                            </div>
+
+                        </lightning:layoutItem>
+
+                        <lightning:layoutItem padding="around-small">
+
+                            <div class="header-column">
+
+                                <p class="field-title" title="Balconies">Balconies</p>
+
+                                <p>{!v.property.No_of_Balcony__c}</p>
+
+                            </div>
+
+                        </lightning:layoutItem>
+
+                    </lightning:layout>
+
+                </div>
+
+                <div class="slds-col slds-border_bottom">
+
+                    <lightning:layout multipleRows="true">
+
+                        <lightning:layoutItem padding="around-small">
+
+                            <div class="header-column">
+
+                                <p class="field-title" title="Super area">Super area</p>
+
+                                <p>{!v.property.Coverd_area_sqft__c} sqft.</p>
+
+                            </div>
+
+                        </lightning:layoutItem>
+
+                        <lightning:layoutItem padding="around-small">
+
+                            <div class="header-column">
+
+                                <p class="field-title" title="Carpet area">Carpet area</p>
+
+                                <p>{!v.property.Carpet_area_sqft__c} sqft</p>
+
+                            </div>
+
+                        </lightning:layoutItem>
+
+                        <lightning:layoutItem padding="around-small">
+
+                            <div class="header-column">
+
+                                <p class="field-title" title="Furnished Type">Furnished Type</p>
+
+                                <p>{!v.property.Furnished_Type__c} </p>
+
+                            </div>
+
+                        </lightning:layoutItem>
+
+                        <lightning:layoutItem padding="around-small">
+
+                            <div class="header-column">
+
+                                <p class="field-title" title="Furnishning Available">Furnishning Available</p>
+
+                                <p>{!v.property.Furnishning_Available__c} </p>
+
+                            </div>
+
+                        </lightning:layoutItem>
+
+                    </lightning:layout>
+
+                </div>
+
+                <div class="slds-col slds-border_bottom">
+
+                    <lightning:layout multipleRows="true">
+
+                      <lightning:layoutItem padding="around-small">
+
+                            <div class="header-column">
+
+                                <p class="field-title" title="Available From">Available From</p>
+
+                                <p>{!v.property.Available_From__c} </p>
+
+                            </div>
+
+                        </lightning:layoutItem>
+
+                        <lightning:layoutItem padding="around-small">
+
+                            <div class="header-column">
+
+                                <p class="field-title" title="Water Availability">Water Availability</p>
+
+                                <p>{!v.property.Water_Availability__c} </p>
+
+                            </div>
+
+                        </lightning:layoutItem>
+
+                        <lightning:layoutItem padding="around-small">
+
+                            <div class="header-column">
+
+                                <p class="field-title" title="Status of Electricity">Status of Electricity</p>
+
+                                <p>{!v.property.Electricity_Status__c} </p>
+
+                            </div>
+
+                        </lightning:layoutItem>
+
+                    </lightning:layout>
+
+                </div>
+
+                 <div class="slds-col slds-border_bottom">
+
+                     <lightning:layout multipleRows="true">
+
+                          <lightning:layoutItem padding="around-small">
+
+                            <div class="header-column">
+
+                                <p class="field-title" title="Floor">Floor</p>
+
+                                <p>{!v.property.Floor__c} </p>
+
+                            </div>
+
+                        </lightning:layoutItem>
+
+                         <lightning:layoutItem padding="around-small">
+
+                            <div class="header-column">
+
+                                <p class="field-title" title="Facing">Facing</p>
+
+                                <p>{!v.property.Facing__c} </p>
+
+                            </div>
+
+                        </lightning:layoutItem>
+
+                         <lightning:layoutItem padding="around-small">
+
+                            <div class="header-column">
+
+                                <p class="field-title" title="Property Status">Property Status</p>
+
+                                <p>{!v.property.Status__c} </p>
+
+                            </div>
+
+                        </lightning:layoutItem>
+
+                         
+
+                     </lightning:layout>
+
+                </div>
+
+            </div>
+
+        </div>
+
+       
+
+    </lightning:layout>
+
+   
+
+</aura:component>
+
+=====================================CSS========================
+
+.THIS {
+
+    background-color:azure;
+
+    border: 1px solid #d8dde6;
+
+    margin:10px 0 20px 0;
+
+}
+
+.THIS .header-column{
+
+    padding: 0 2rem;
+
+}
+
+.THIS .field-title{
+
+    font-size: .75rem;
+
+    line-height: 1.25 rem;
+
+    color:brown;
+
+    margin-bottom: .25rem;
+
+}
+
+====================================ctrlf_MyPropertyTab.cmp============================
+
+<aura:component controller="PropertyDetais" implements="lightning:isUrlAddressable, flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+
+    <aura:attribute name="propertyId" type="String"></aura:attribute>
+
+    <aura:attribute name="property" type="Property__c"></aura:attribute>
+
+    <aura:attribute name="propertyFound" type="boolean" default="false"></aura:attribute>
+
+    <aura:handler name="init" value="{!this}" action="{!c.getSelectedProperty}"></aura:handler>
+
+    <lightning:tabset variant="scoped">
+
+        <lightning:tab label="Property Details">
+
+            <div class="slds-p-around_medum" >
+
+              <c:ctrlf_MyPropertyDetails property="{!v.property}"></c:ctrlf_MyPropertyDetails>   
+
+            </div>
+
+        </lightning:tab>
+
+        <lightning:tab label="Pricing Details">
+
+            <div class="slds-p-around_medum" >
+
+              <c:ctrlf_MyPropertyPricing property="{!v.property}"></c:ctrlf_MyPropertyPricing>   
+
+            </div>
+
+        </lightning:tab>
+
+       
+
+        <lightning:tab label="Onwer Details">
+
+            <aura:if isTrue="{!v.propertyFound}">
+
+                <div class="slds-p-around_medum" style="background-color:azure">
+
+                    <c:ctrlf_MyPropertyOwner propertyOwnerId="{!v.property.Property_Owner__c}"></c:ctrlf_MyPropertyOwner>
+
+                </div>
+
+            </aura:if>
+
+        </lightning:tab>
+
+       
+
+        <lightning:tab label="Property Video">
+
+            <aura:if isTrue="{!v.propertyFound}">
+
+                <div class="slds-p-around_medum" style="background-color:azure">
+
+                   <c:ctrlf_MyPropertyVideo property="{!v.property}"></c:ctrlf_MyPropertyVideo>
+
+                </div>
+
+            </aura:if>
+
+        </lightning:tab>
+
+    </lightning:tabset>
+
+</aura:component>
+
+
+
+Fullscreen
+Go to Previous lecture31. Create Property Details Component to display p…
+Go to Next lecture33. Create Property Filter component to search pro…
