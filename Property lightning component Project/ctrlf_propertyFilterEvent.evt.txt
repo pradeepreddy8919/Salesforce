@@ -1,0 +1,9 @@
+Sample code for Component composition- property owner component
+============================ctrlf_propertyFilterEvent======================
+
+<aura:event type="Component" description="Event template" >
+	<aura:attribute name ="locFilter" type = 'string'></aura:attribute>
+    <aura:attribute name ="bedRoomFilter" type = 'string'></aura:attribute>
+    <aura:attribute name ="bathRoomFilter" type = 'string'></aura:attribute>
+    <aura:attribute name ="budgetFilter" type = 'string'></aura:attribute>
+</aura:event>

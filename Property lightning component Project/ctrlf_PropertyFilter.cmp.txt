@@ -1,0 +1,201 @@
+Source code for this property filter
+=============Property filter component============
+
+<aura:component implements="flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+
+<aura:attribute name="location" type="string"></aura:attribute>
+
+    <aura:attribute name="noOfBedRoom" type="string"></aura:attribute>
+
+    <aura:attribute name="noOfBathRoom" type="string"></aura:attribute>
+
+    <aura:attribute name="maxBudget" type="string"></aura:attribute>
+
+    <aura:attribute name="locationOptions" type="List"></aura:attribute>
+
+    <aura:attribute name="noOfBedRoomOptions" type="List"></aura:attribute>
+
+    <aura:attribute name="noOfBathRoomOptions" type="List"></aura:attribute>
+
+    <aura:handler name="init" value="this" action="{!c.initFilter}"></aura:handler>
+
+     <aura:registerEvent name="ctrlf_propertyFilterEvent" type="c:ctrlf_propertyFilterEvent"/>
+
+    <lightning:layout multiplerows="true" class="filterlayout">
+
+        <lightning:layoutitem padding="around-small">
+
+            <div class="header-column">             
+
+                <lightning:combobox label="Locality" placeholder="Select Locality" fieldLevelHelp="Search property based on locality"
+
+                    variant="label-stacked" value="{!v.location}" options="{!v.locationOptions}"  onchange="{!c.handleFilterChange}">
+
+                </lightning:combobox>               
+
+            </div>
+
+        </lightning:layoutitem>
+
+        <lightning:layoutitem padding="around-small">
+
+            <div class="header-column">
+
+                <lightning:combobox label="No of Bedroom" placeholder="Select" fieldLevelHelp="Search property based on No of Bed Room"
+
+                    variant="label-stacked" value="{!v.noOfBedRoom}" options="{!v.noOfBedRoomOptions}"  onchange="{!c.handleFilterChange}">
+
+                </lightning:combobox>
+
+                 
+
+            </div>
+
+        </lightning:layoutitem>
+
+        <lightning:layoutitem padding="around-small">
+
+            <div class="header-column">
+
+                <lightning:combobox label="No of Bath Room" placeholder="Select" fieldLevelHelp="Search property based on No of Bath Room"
+
+                    variant="label-stacked" value="{!v.noOfBathRoom}" options="{!v.noOfBathRoomOptions}"  onchange="{!c.handleFilterChange}">
+
+                </lightning:combobox>
+
+               
+
+            </div>
+
+        </lightning:layoutitem>
+
+     
+
+        <lightning:layoutitem padding="around-small">
+
+            <div class="header-column">
+
+                <lightning:input type="number" value="{!v.maxBudget}" onchange="{!c.handleFilterChange}" fieldLevelHelp="Search property based on your budget" name="maxbudget" label="Maximum Budget" placeholder="Enter maximum Budget"></lightning:input>
+
+                 
+
+            </div>
+
+        </lightning:layoutitem>
+
+    </lightning:layout>
+
+</aura:component>
+
+==============Controller============
+
+({
+
+    initFilter : function(component, event, helper) {
+
+        var locationOption = [ { label: 'ALL', value: 'ALL' },
+
+                              { label: 'Bangalore', value: 'Bangalore' },
+
+                              { label: 'Mumbai', value: 'Mumbai' },
+
+                              { label: 'Hyderabad', value: 'Hyderabad' },
+
+                              { label: 'Pune', value: 'Pune' },
+
+                              { label: 'Bhubaneswar', value: 'Bhubaneswar' }];
+
+        component.set('v.locationOptions',locationOption);
+
+       
+
+        var noOfBedRoomOptions =  [ { label: 'ALL', value: 'ALL' },
+
+                                   { label: '1', value: '1' },
+
+                                   { label: '2', value: '2' },
+
+                                   { label: '3', value: '3' },
+
+                                   { label: '4', value: '4' } ];
+
+        component.set('v.noOfBedRoomOptions',noOfBedRoomOptions);
+
+       
+
+        var noOfBathRoomOptions =  [{ label: 'ALL', value: 'ALL' },
+
+                                    { label: '1', value: '1' },
+
+                                    { label: '2', value: '2' },
+
+                                    { label: '3', value: '3' },
+
+                                    { label: '4', value: '4' } ];
+
+        component.set('v.noOfBathRoomOptions',noOfBathRoomOptions);
+
+    },
+
+    handleFilterChange : function(component, event, helper) {
+
+        //lets find out which event to fire
+
+        console.log('inside handleFilterChange');
+
+        var filterEvent = component.getEvent("ctrlf_propertyFilterEvent");
+
+        //set event parameters
+
+        filterEvent.setParams( {
+
+            "locFilter" : component.get("v.location") ,
+
+             "bedRoomFilter" : component.get("v.noOfBedRoom") ,
+
+             "bathRoomFilter" : component.get("v.noOfBathRoom") ,
+
+             "budgetFilter" : component.get("v.maxBudget")
+
+        } );
+
+        //fire the event
+
+        filterEvent.fire();
+
+       console.log('inside handleFilterChange completed');
+
+    }
+
+})
+
+
+============Style============
+
+.THIS.filterlayout {
+
+    background-color:darkturquoise;
+
+}
+
+.THIS .header-column{
+
+    color:brown;
+
+    padding:0 2rem;   
+
+}
+
+.THIS.c-container{
+
+    border: 1px solid #d8dde6;
+
+    margin: 10px 0 20 px 0;
+
+}
+
+===========================================================================
+
+
+
+

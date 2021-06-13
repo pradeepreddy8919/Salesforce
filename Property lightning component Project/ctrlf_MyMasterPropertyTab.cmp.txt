@@ -1,0 +1,125 @@
+<aura:component controller="PropertyDetais" implements="lightning:isUrlAddressable,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+
+    <aura:attribute name="propertyId" type="String"></aura:attribute>
+
+    <aura:attribute name="property" type="Property__c"></aura:attribute>
+
+    <aura:attribute name="propertyFound" type="boolean" default="false"></aura:attribute>
+
+    <aura:handler name="init" value="{!this}" action="{!c.getSelectedProperty}"></aura:handler>
+
+    <lightning:tabset variant="scoped">
+
+        <lightning:tab label="Property Details">
+
+            <div class="slds-p-around_medum" >
+
+              <c:ctrlf_MyPropertyDetails property="{!v.property}"></c:ctrlf_MyPropertyDetails>   
+
+            </div>
+
+        </lightning:tab>
+
+        <lightning:tab label="Pricing Details">
+
+            <div class="slds-p-around_medum" >
+
+              <c:ctrlf_MyPropertyPricing property="{!v.property}"></c:ctrlf_MyPropertyPricing>   
+
+            </div>
+
+        </lightning:tab>
+
+       
+
+        <lightning:tab label="Onwer Details">
+
+            <aura:if isTrue="{!v.propertyFound}">
+
+                <div class="slds-p-around_medum" style="background-color:azure">
+
+                    <c:ctrlf_PropertyOwner propertyOwnerId="{!v.property.Property_Owner__c}"></c:ctrlf_PropertyOwner>
+
+                </div>
+
+            </aura:if>
+
+        </lightning:tab>
+
+       
+
+        <lightning:tab label="Property Video">
+
+            <aura:if isTrue="{!v.propertyFound}">
+
+                <div class="slds-p-around_medum" style="background-color:azure">
+
+                   <c:ctrlf_MyPropertyVideo property="{!v.property}"></c:ctrlf_MyPropertyVideo>
+
+                </div>
+
+            </aura:if>
+
+        </lightning:tab>
+
+    </lightning:tabset>
+
+</aura:component>
+
+
+
+===========CONTROLLER==================
+
+
+({
+
+getSelectedProperty : function(component, event, helper) {
+
+helper.getproertyDetails(component, event, helper);
+
+}
+
+})
+
+
+
+=================helper=============
+
+
+({
+
+getproertyDetails : function(component, event, helper) {
+
+        var pageReference = component.get("v.pageReference");
+
+        console.log('getproertyDetails pageReference'+JSON.stringify(pageReference));
+
+        var pid = pageReference.state.c__propertyId;
+
+         console.log('getproertyDetails pageReference pid'+pid);
+
+var action = component.get('c.getDetails');
+
+        action.setParams({
+
+            'propId':pid
+
+        });
+
+        action.setCallback(this,function(response){
+
+        var state = response.getState();
+
+            var responseValue= response.getReturnValue();
+
+            component.set('v.property',responseValue);
+
+             component.set('v.propertyFound',true);
+
+        });
+
+        $A.enqueueAction(action,false);
+
+}
+
+})

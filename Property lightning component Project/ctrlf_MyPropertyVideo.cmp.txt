@@ -1,0 +1,12 @@
+Sample code for Creating component to play the property video
+================ctrlf_MyPropertyVideo.cmp=============
+
+<aura:component implements="flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+
+<aura:attribute name="property" type="Property__c">
+
+    </aura:attribute>
+
+    <iframe width="1200" height="455" src="{!v.property.Property_Video_URL__c}" allowfullscreen="true"></iframe>
+
+</aura:component>

@@ -1,0 +1,404 @@
+ctrlf_MyPropertyResult.cmp==============================
+
+
+<aura:component controller="PropertyDetais" implements="flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+
+    <aura:attribute name="propertyList" type="Property__c[]"></aura:attribute>
+
+    <aura:attribute name="propertiesFound" type="boolean" default="false"></aura:attribute>
+
+    <aura:attribute name="propOwnerId" type="string" ></aura:attribute>
+
+    <aura:attribute name="openOwnerDetails" type="boolean" default="false"></aura:attribute>
+
+    <aura:attribute name="openEnquieryDetails" type="boolean" default="false"></aura:attribute>
+
+    <aura:attribute name="propertyId" type="string" default="false"></aura:attribute>
+
+    <aura:handler name="init" value="this" action="{!c.fetchAllProperty}"></aura:handler>
+
+    <lightning:navigation aura:id="navService"/>
+
+    <aura:attribute name="pageReference" type="Object"/>
+
+    <aura:attribute name="url" type="String"/>
+
+<!--    <aura:attribute name="showSpinner" type="boolean" default="False"/>-->
+
+    <aura:handler name="ctrlf_propertyFilterEvent" event="c:ctrlf_propertyFilterEvent" action="{!c.handlePropertyFilter}"/>
+
+    <c:ctrlf_PropertyFilter></c:ctrlf_PropertyFilter>
+
+<!-- <aura:if isTrue="{!v.showSpinner}">
+
+        <div class="resultSpinner">
+
+            <lightning:spinner alternativeText="Loading" size="large" />
+     </div>
+
+    </aura:if>-->
+
+    <aura:if isTrue="{!v.propertiesFound}">
+               
+        <lightning:layout multipleRows="true">
+
+            <aura:iteration items="{!v.propertyList}" var="prop">
+
+                <lightning:layoutItem size="6" padding="around-small">
+
+                    <lightning:layout multipleRows="true">
+
+                        <div  class="slds-box" style="width: 100%;background-color:white;">
+
+                            <lightning:layout>
+
+                                <lightning:layoutItem size="4" padding="around-small">
+
+                                    <lightning:formattedRichText value="{!prop.Property_Main_Image__c}"></lightning:formattedRichText>
+
+                                </lightning:layoutItem>
+
+                                <lightning:layoutItem size="8" padding="around-small"  >
+
+                                    <lightning:card title="{!prop.Furnished_Type__c}" >
+
+                                        <lightning:layoutItem size="12"  >
+
+                                            <p style="color:red;">INR: {!prop.Rent__c}</p>
+                                            <p style="color:Blue;">City: {!prop.Location1__c}</p>
+
+                                        </lightning:layoutItem>
+
+                                        <lightning:layoutItem size="12"  >
+
+                                            <p >{!prop.No_Of_Bed_Room__c} BHK House for Rent {!prop.Coverd_area_sqft__c} SQft</p>
+
+                                        </lightning:layoutItem>
+
+                                        <lightning:layoutItem size="12"  >
+
+                                            <p >{!prop.Area__c}</p>
+
+                                        </lightning:layoutItem>
+
+                                        <lightning:layoutItem size="12"  >
+
+                                            <p >{!prop.No_Of_Bed_Room__c} Room {!prop.No_Of_Bath_Room__c} BathRoom {!prop.Furnished_Type__c}</p>
+
+                                        </lightning:layoutItem>
+
+                                    </lightning:card> 
+
+                                    <div class="slds-p-top_small">
+
+                                        <lightning:buttonGroup>
+
+                                            <lightning:button variant="success" class="btnStyle" label="Owner Details"  value="{!prop.Property_Owner__c}" onclick="{!c.ownerDetailsClick}"></lightning:button>                           
+
+                                            <lightning:button variant="success" class="btnStyle" label="Enquiery"  value="{!prop.Id}" onclick="{!c.feedbackClicked}"></lightning:button>
+
+                                            <lightning:button variant="success" class="btnStyle" label="Property Details"  value="{!prop.Id}" onclick="{!c.NavigateToPropDetails}"></lightning:button>
+
+                                        </lightning:buttonGroup>
+
+                                    </div>
+
+                                </lightning:layoutItem>
+
+                            </lightning:layout>
+
+                        </div>
+
+                    </lightning:layout>                   
+
+                </lightning:layoutItem>
+
+            </aura:iteration>
+
+           
+
+        </lightning:layout>
+        
+        <aura:set attribute="else">
+                <lightning:spinner alternativeText="Loading" size="large" />
+            </aura:set>
+        
+
+    </aura:if>
+
+    <!-- Owner details section start-->
+
+   
+
+    <aura:if isTrue="{!v.openOwnerDetails}">
+
+        <div style="margin-top: 5%">
+
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+
+                <div class="slds-modal__container">
+
+                    <header class="slds-modal__header">                     
+
+                        <lightning:card title="Property Owner Details" iconName="standard:people">                        
+						 
+                            <lightning:buttonIcon class="slds-modal__close" iconName="utility:close" onclick="{!c.closeOwnerModal}" >							
+                            </lightning:buttonIcon>
+							
+                        </lightning:card>
+                        
+                    </header>
+
+                    <div class="slds-modal__content slds-p-around_medium">
+                        
+
+                        <c:ctrlf_PropertyOwner propertyOwnerId="{!v.propOwnerId}"></c:ctrlf_PropertyOwner>
+
+                        <!--<lightning-button variant="success" label="Cancel" class="slds-m-left_x-small"  onclick={closeOwnerModal}></lightning-button>                           -->
+
+                        <!--<lightning-button-icon class="slds-modal__close" icon-name="utility:close" onclick={closeOwnerModal}></lightning-button-icon>-->
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>     
+
+    </aura:if>
+
+    <aura:if isTrue="{!v.openEnquieryDetails}">
+
+        <div style="margin-top: 5%">
+
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+
+                <div class="slds-modal__container">
+
+                    <header class="slds-modal__header" >
+ 						<lightning:card title="Submit Your Enquiery" iconName="standard:question_feed">
+                        <lightning:buttonIcon class="slds-modal__close" iconName="utility:close" onclick="{!c.closeEnquieryModal}"></lightning:buttonIcon >     
+                        </lightning:card>
+                    </header>
+
+                    <div class="slds-modal__content slds-p-around_medium">                      
+
+                        <c:ctrlf_MyPropertyEnquiery propertyId="{!v.propertyId}"></c:ctrlf_MyPropertyEnquiery>
+
+                       <!-- <lightning-button variant="success" label="Cancel" class="slds-m-left_x-small"  onclick={closeOwnerModal}></lightning-button>-->
+
+                        <!--<lightning-button-icon class="slds-modal__close" icon-name="utility:close" onclick={closeOwnerModal}></lightning-button-icon>-->
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+       
+
+    </aura:if>
+
+</aura:component>
+
+====================================controller=======================
+
+({
+
+    fetchAllProperty : function(component, event, helper) {
+
+        helper.fetchAllPropertyHelper(component, event, helper);
+
+    },
+
+    ownerDetailsClick : function(component, event, helper) {
+
+        var eventSource = event.getSource();
+
+        var propOwnerId = eventSource.get('v.value');
+
+        component.set('v.propOwnerId',propOwnerId);
+
+        component.set('v.openOwnerDetails',"true"); 
+
+       
+
+    },
+
+    closeOwnerModal : function(component, event, helper) {
+
+        component.set('v.openOwnerDetails',"false");   
+
+    },
+
+    feedbackClicked : function(component, event, helper) {
+
+        var eventSource = event.getSource();
+
+        var propId = eventSource.get('v.value');
+
+        component.set('v.propertyId',propId);
+
+        component.set('v.openEnquieryDetails',"true");     
+
+    },
+
+    closeEnquieryModal : function(component, event, helper) {
+
+        component.set('v.openEnquieryDetails',"false");   
+
+    },
+
+    NavigateToPropDetails : function(component, event, helper) {
+
+        var navService = component.find("navService");
+
+        var eventSource = event.getSource();
+
+        var propId = eventSource.get('v.value');
+
+        console.log('NavigateToPropDetails propId'+propId);
+
+        var pageReference = {
+
+            type: "standard__component",
+
+            attributes:{
+
+                componentName:"c__ctrlf_MyMasterPropertyTab"
+
+            },
+
+            state:{
+
+                "c__propertyId":propId
+
+            }
+
+        };
+
+         console.log('NavigateToPropDetails pageReference'+pageReference);
+
+        component.set("v.pageReference",pageReference);
+
+         console.log('NavigateToPropDetails pageReference'+JSON.stringify(pageReference));
+
+        navService.navigate(pageReference);
+
+    },
+
+    handlePropertyFilter:function(component, event, helper) {
+
+         console.log('Inside handlePropertyFilter');
+
+    helper.fetchFilteredProperty(component, event, helper);
+
+}
+
+})
+
+
+
+========================Helper================
+
+({
+
+fetchAllPropertyHelper : function(component, event, helper) {
+
+var action = component.get('c.getLatestProperty');
+
+        action.setCallback(this,function(response){
+
+        var responseValues= response.getReturnValue();
+
+            component.set('v.propertyList',responseValues);
+
+            component.set('v.propertiesFound',true);
+
+        });
+
+        $A.enqueueAction(action,false);
+
+},
+
+    fetchFilteredProperty:function(component, event, helper){
+
+         console.log('inside fetchFilteredProperty');
+
+    //get the parameter filter which set in event parameter
+
+    var locFilter = event.getParam("locFilter");
+
+        var bedRoomFilter = event.getParam("bedRoomFilter");
+
+        var bathRoomFilter = event.getParam("bathRoomFilter");
+
+        var budgetFilter = event.getParam("budgetFilter");
+
+        console.log('locFilter'+locFilter);
+
+         console.log('bedRoomFilter'+bedRoomFilter);
+
+         console.log('bathRoomFilter'+bathRoomFilter);
+
+         console.log('budgetFilter'+budgetFilter);
+
+    //which action to fire to get my property filtererd result  - apex method= getSearchedProperty
+
+    var action = component.get('c.getSearchedProperty');
+
+        action.setParams({
+
+            'location':locFilter,
+
+            'bedroom':bedRoomFilter,
+
+            'bathroom':bathRoomFilter,
+
+            'maxbudget':budgetFilter
+
+        });
+
+        action.setCallback(this,function(response){
+
+            var responseValues = response.getReturnValue();
+
+            console.log('filtered poperty '+JSON.stringify(responseValues));
+
+            component.set('v.propertyList',responseValues);
+
+            //component.set('v.showSpinner',True);
+         //    cmp.set('v.showSpinner', !cmp.get('v.showSpinner'));
+            component.set('v.propertiesFound',true);
+
+           
+
+        });
+
+        $A.enqueueAction(action,false);
+
+    }
+
+})
+
+
+===================STYLE===============
+
+
+.THIS.btnStyle {
+
+    margin:8px;
+
+}
+
+.THIS .slds-modal__close {
+    top: 0.1rem!important;
+    right: 0.1rem;
+    color: red;
+
+}
+
+
