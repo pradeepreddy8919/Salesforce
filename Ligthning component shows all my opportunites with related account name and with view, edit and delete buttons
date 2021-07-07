@@ -165,3 +165,27 @@ helper.JS
 	},
 		
 })
+
+Apex class/****
+
+public class opplist {
+   
+   @AuraEnabled
+    public static List <Opportunity> fetchAccts() {
+   //     Id userId =UserInfo.getUserId();
+       list<opportunity> opps = new list<opportunity>([select Name, Account.Name, StageName,
+                                                       CloseDate, Amount FROM opportunity Where OwnerId =: UserInfo.getUserId()]);
+        return opps;
+    }
+    @AuraEnabled
+	public static List<opportunity> deleteopportunity(String recId) {
+        
+		if(recId != null){
+	opportunity delopp =[Select Id from Opportunity where id=:recId];
+	delete delopp;
+}
+//Below Query is for after delete the record again we have reload the page and show the remaning opportunity
+	return [Select Name, Account.Name, StageName, CloseDate, Amount FROM opportunity Where OwnerId =: UserInfo.getUserId()];
+}
+
+}
