@@ -3,8 +3,11 @@ Aura component on lead with checkbox to update fields
 <aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" Controller="LeadController" access="global" >
     <aura:handler action="{!c.doInit}" value="{!this}" name="init"></aura:handler>
     <aura:attribute name="lead" type="Lead" default="{}"></aura:attribute>
-    <lightning:spinner alternativeText="Loading" size="medium" class="slds-hide" aura:id="spinner" />
+    <aura:attribute name="spinner" type="boolean" default="false"></aura:attribute>
   <lightning:card>
+      <aura:if isTrue="{!v.spinner}">
+      	<lightning:spinner alternativeText="Loading" size="medium"/>
+      </aura:if>
       <div class="slds-page-header">
         <div class="slds-page-header__row">
             <div class="slds-page-header__col-title">
@@ -113,13 +116,14 @@ Aura component on lead with checkbox to update fields
         action.setParams({
             "leadData":lead
         });
-     //  $A.util.removeClass('spinner', 'slds-hide')
+        component.set("v.spinner",true);
         action.setCallback(this,function(response){
             console.log('response recieved : ',response.getReturnValue());
-     //      $A.util.addClass('spinner', 'slds-hide')
-           // $A.get('e.force:refreshView').fire();
-         window.location.reload();
-          //  component.set("v.lead",response.getReturnValue());
+            component.set("v.lead",response.getReturnValue());
+            component.set("v.spinner",false);
+            $A.get('e.force:refreshView').fire();
+            
+           // window.location.reload();
         });
         
         $A.enqueueAction(action);
@@ -140,8 +144,9 @@ public class LeadController {
     }
     
     @AuraEnabled
-    public static void updateLead(lead leadData){
+    public static lead updateLead(lead leadData){
         system.debug('Lead Data : '+leadData);
         update leadData;
+        return leadData;
     }
 }
