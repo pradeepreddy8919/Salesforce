@@ -1,50 +1,37 @@
 Aura component on lead with checkbox to update fields 
 
-<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" Controller="LeadController" access="global" >
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" Controller="Updatefieldsusingcheckbox" access="global" >
     <aura:handler action="{!c.doInit}" value="{!this}" name="init"></aura:handler>
-    <aura:attribute name="lead" type="Lead" default="{}"></aura:attribute>
+    <aura:attribute name="contact" type="Contact" default="{}"></aura:attribute> 
     <aura:attribute name="spinner" type="boolean" default="false"></aura:attribute>
   <lightning:card>
       <aura:if isTrue="{!v.spinner}">
-      	<lightning:spinner alternativeText="Loading" size="medium"/>
-      </aura:if>
-      <div class="slds-page-header">
-        <div class="slds-page-header__row">
-            <div class="slds-page-header__col-title">
-                <div class="slds-media">
-                    <div class="slds-media__figure">
-                        <span class="slds-icon_container slds-icon-standard-opportunity" title="opportunity">
-                            
-                            <span class="slds-assistive-text">Lead Activity</span>
-                        </span>
-                    </div>
-                    <div class="slds-media__body">
-                        <div class="slds-page-header__name">
-                            <div class="slds-page-header__name-title">
-                                <h1>
-                                    <span class="slds-page-header__title slds-truncate" title="Rohde Corp - 80,000 Widgets">Lead Activity</span>
-                                </h1>
-                            </div>
-                        </div>
-                        <p class="slds-page-header__name-meta"></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+     	<lightning:spinner alternativeText="Loading" size="medium"/>
+      </aura:if>       
+    <div class="demo-only demo-only--sizing slds-grid slds-wrap" style= "Padding: 10px;">
         <div class="slds-size_1-of-2">
-            <lightning:input type="checkbox" checked="{!v.lead.Email__c}" label="Email" name="input1" onchange="{!c.handleCheckbox}"/>
+            <lightning:input type="checkbox" checked="{!v.contact.Email__c}" label="Email" name="input1" onchange="{!c.handleCheckbox}"/>
         </div>
         <div class="slds-size_1-of-2">
-            <lightning:input type="text" name="input6" label="Email" readonly="true" value="{!v.lead.Email}" />
+            <lightning:input type="text" name="input5" label="Email" readonly="true" value="{!v.contact.Email}" />
         </div>
         <div class="slds-size_1-of-2">
-            <lightning:input type="checkbox" label="Date" checked="{!v.lead.Date_Checkbox__c}" name="input2" onchange="{!c.handleCheckbox}"/>
+            <lightning:input type="checkbox" label="Date" checked="{!v.contact.Date__c}" name="input2" onchange="{!c.handleCheckbox}"/>
         </div>
         <div class="slds-size_1-of-2">
-            <lightning:input type="date" name="input6" label="Date" readonly="true" value="{!v.lead.Date__c}" />
+            <lightning:input type="date" name="input6" label="Date" readonly="true" value="{!v.contact.Updated_date__c}" />
+        </div>
+        <div class="slds-size_1-of-2">
+            <lightning:input type="checkbox" label="Level" checked="{!v.contact.Level_checkbox__c}" name="input3" onchange="{!c.handleCheckbox}"/>
+        </div>
+        <div class="slds-size_1-of-2">
+            <lightning:input type="Picklist" name="input7" label="Level" readonly="true" value="{!v.contact.Level__c}" />
+        </div>
+        <div class="slds-size_1-of-2">
+            <lightning:input type="checkbox" label="Home Phone" checked="{!v.contact.Phone_checkbox__c}" name="input4" onchange="{!c.handleCheckbox}"/>
+        </div>
+        <div class="slds-size_1-of-2">
+            <lightning:input type="Phone" name="input8" label="Home Phone" readonly="true" value="{!v.contact.HomePhone}" />
         </div>
     </div>
     <div class="slds-align_absolute-center slds-p-top_large">
@@ -58,95 +45,103 @@ Aura component on lead with checkbox to update fields
 
 *******controller***************
 
-
 ({
 	doInit : function(component, event, helper) {
-		var action = component.get("c.getLead");
+		var action = component.get("c.getcontact");
         action.setParams({
-            "leadId":component.get("v.recordId")
+            "contactId":component.get("v.recordId")
         });
         action.setCallback(this,function(response){
             console.log('response recieved : ',response.getReturnValue());
-            component.set("v.lead",response.getReturnValue());
-        });
-        
+            component.set("v.contact",response.getReturnValue());
+        });       
         $A.enqueueAction(action);
-	},
-    
+	},   
      handleCheckbox: function(component, event, helper){
         const name = event.getSource().get("v.name");
         const value = event.getSource().get("v.checked");
         console.log('Value : ',value);
-        var lead = component.get("v.lead");
+        var contact = component.get("v.contact");
         if(name == 'input1'){
             if(value){
-                lead.Email__c = true;
+                contact.Email__c = true;
             }else{
-                lead.Email__c = false;
+                contact.Email__c = false;
             }
-        }
-        
+        }        
         if(name == 'input2'){
             if(value){
-                lead.Date_Checkbox__c = true;
+                contact.Date__c = true;
             }else{
-                lead.Date_Checkbox__c = false;
-            }
-           
+                contact.Date__c = false;
+            }          
         }
-    },
-    
+         if(name == 'input3'){
+            if(value){
+                contact.Level_checkbox__c = true;
+            }else{
+                contact.Level_checkbox__c = false;
+            }           
+        }
+         if(name == 'input4'){
+            if(value){
+                contact.Phone_checkbox__c = true;
+            }else{
+                contact.Phone_checkbox__c = false;
+            }           
+        }
+    },    
     handleClick: function(component, event, helper){
-        var lead = component.get("v.lead");
-        
-        console.log('Date : ',lead.Date_Checkbox__c);
-        if(lead.Date_Checkbox__c == false){
-            lead.Date__c = null;
+        var contact = component.get("v.contact");       
+        console.log('Date : ',contact.Date__c);
+        if(contact.Date__c == false){
+            contact.Updated_date__c = null;
         }else{
-            lead.Date__c = new Date();
-        }
-        
-        if(lead.Email__c == false){
-            lead.Email = null;
+            contact.Updated_date__c = new Date();
+        }    
+        if(contact.Email__c == false){
+            contact.Email = null;
         }else{
-            lead.Email = 'Test@test.com';
+            contact.Email = 'Test@test.com';
         }
-        
-        var action = component.get("c.updateLead");
+        if(contact.Level_checkbox__c == false){
+            contact.Level__c = null;
+        }else{
+            contact.Level__c = 'Primary';
+        }
+         if(contact.Phone_checkbox__c == false){
+            contact.HomePhone = null;
+        }else{
+            contact.HomePhone = '1234567890';
+        }
+        var action = component.get("c.updateContact");
         action.setParams({
-            "leadData":lead
+            "contactData":contact
         });
         component.set("v.spinner",true);
         action.setCallback(this,function(response){
             console.log('response recieved : ',response.getReturnValue());
-            component.set("v.lead",response.getReturnValue());
+            component.set("v.contact",response.getReturnValue());
             component.set("v.spinner",false);
-            $A.get('e.force:refreshView').fire();
-            
-           // window.location.reload();
+            $A.get('e.force:refreshView').fire();        
         });
-        
         $A.enqueueAction(action);
     }
     
-   
-   
 })
 
 Apex class ******************
 
 
-public class LeadController {
-
+public class Updatefieldsusingcheckbox {
     @AuraEnabled
-    public static Lead getLead(string leadId){
-        return [select id , Date__c, Email,Email__c,Date_Checkbox__c from lead where Id =: leadId];
+    public static Contact getcontact(string contactId){
+        return [select id , Date__c, Email,Email__c,Updated_date__c,Level__c, Level_checkbox__c, HomePhone,Phone_checkbox__c from Contact where Id =: contactId];
     }
-    
     @AuraEnabled
-    public static lead updateLead(lead leadData){
-        system.debug('Lead Data : '+leadData);
-        update leadData;
-        return leadData;
+    public static Contact updateContact(Contact contactData){
+        system.debug('Contact Data : '+contactData);
+        update contactData;
+        return contactData;
     }
 }
