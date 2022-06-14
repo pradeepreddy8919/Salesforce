@@ -3,11 +3,7 @@ Name: MH_MigrateGroupLeadstoOrgContacts
 ================================================================================
 Purpose:
 Lead Management - Batch Job to Migrate group lead Recordswith related records to organisational contact records
-=================================================================================
-History:
-VERSION       AUTHOR                       DATE              			DETAIL
-1.0           Nitin Kumar        		10/06/2022         			Initial Dev
-***********************************************************************************/
+
 global class MH_MigrateGroupLeadstoOrgContacts implements Database.Batchable<sObject> {
     
     global Database.QueryLocator start(Database.BatchableContext bc) {
