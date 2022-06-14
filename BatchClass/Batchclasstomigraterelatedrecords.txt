@@ -1,0 +1,146 @@
+/*********************************************************************************
+Name: MH_MigrateGroupLeadstoOrgContacts
+================================================================================
+Purpose:
+Lead Management - Batch Job to Migrate group lead Recordswith related records to organisational contact records
+=================================================================================
+History:
+VERSION       AUTHOR                       DATE              			DETAIL
+1.0           Nitin Kumar        		10/06/2022         			Initial Dev
+***********************************************************************************/
+global class MH_MigrateGroupLeadstoOrgContacts implements Database.Batchable<sObject> {
+    
+    global Database.QueryLocator start(Database.BatchableContext bc) {
+        string query = 'Select Id, Name,Group_Lead__c from MH_OrganizationalContact__c Where Group_Lead__c != null' ;
+        return Database.getQueryLocator(query);
+    }
+    
+    global void execute(Database.BatchableContext bc, List<MH_OrganizationalContact__c> scope){
+        
+        // try catch block to catch any exception while executing batch
+        // start of try block
+        try{
+            List<MH_Group_Event__c> updateGpEvents = new List<MH_Group_Event__c>();
+            List<Opportunity> updateopps = new List<Opportunity>();
+            List<Lead> updateleads = new List<Lead>();
+            List<ContentDocumentLink> insertLinks = new List<ContentDocumentLink>();
+          	List<ContentDocumentLink> deleteLinks = new List<ContentDocumentLink>();
+            List<Task> updateTaskRecords = new List<Task>();
+            List<Event> updateEventRecords = new List<Event>();
+            Set<Id> leadId = new Set<Id>();
+            For(MH_OrganizationalContact__c orgcontact: scope){
+                leadId.add(orgcontact.Group_Lead__c);   
+            }
+            List<Lead> LeadRecords = [Select Id, name, MH_GroupEventReferral__c from Lead where id=:leadId];
+            List<MH_Group_Event__c> GroupEventRecords = [Select Id, name, MH_Lk_Lead__c,Organizational_Contact__c from MH_Group_Event__c where MH_Lk_Lead__c=:leadId];
+             system.debug('GroupEventRecords'+GroupEventRecords);
+            List<Opportunity> OpportunityRecords = [Select Id, name, MH_Group_Lead__c,MH_OrganizationalContactReferral__c from Opportunity where MH_Group_Lead__c=:leadId];
+            
+            List<Lead> noteRecords = [Select Id, name, MH_GroupEventReferral__c,(select Id, LinkedEntityId, ContentDocumentId from ContentDocumentLinks) from Lead where id=:leadId];
+            system.debug('LeadRecords'+LeadRecords);
+            List<Lead> ChildLeadRecords = [Select Id, name, MH_GroupEventReferral__c,MH_Group_Lead__c from Lead where MH_Group_Lead__c=:leadId]; 
+            system.debug('ChildLeadRecords'+ChildLeadRecords);
+            List<Task> TaskRecords = [Select id,WhatId, WhoId from Task where WhoId =:leadId];
+            List<Event> EventRecords = [Select id,WhatId, WhoId from Event where WhoId =:leadId];            
+            
+            For(MH_OrganizationalContact__c orgcon: scope){
+                system.debug('true1');
+                For(lead ler: LeadRecords){
+                    system.debug('true2');
+                    if(orgcon.Group_Lead__c==ler.Id){ 
+                        system.debug('true3');
+                        For(MH_Group_Event__c gpEvent: GroupEventRecords){
+                            system.debug('true4');
+                            if(gpEvent.MH_Lk_Lead__c==ler.Id){
+                                system.debug('true5');
+                                gpEvent.Organizational_Contact__c=orgcon.Id; 
+                                updateGpEvents.add(gpEvent);
+                            }
+                        }
+                        For(Opportunity opp: OpportunityRecords){
+                            if(opp.MH_Group_Lead__c==ler.Id){
+                                opp.MH_OrganizationalContactReferral__c=orgcon.Id; 
+                                updateopps.add(opp);
+                            }
+                        }
+                        
+                        For(lead childlead: ChildLeadRecords){
+                            if(childlead.MH_Group_Lead__c==ler.Id){
+                                childlead.MH_OrganizationalContactReferral__c=orgcon.Id; 
+                                updateleads.add(childlead);
+                                
+                            }
+                        }
+                        For(Task tas: TaskRecords){
+                            if(tas.WhoId==ler.Id){
+                                tas.WhoId=null;
+                                tas.WhatId=orgcon.Id;                         
+                                updateTaskRecords.add(tas);
+                            }
+                        }
+                        For(Event eve: EventRecords){
+                            if(eve.WhoId==ler.Id){
+                                eve.WhoId=null;
+                                eve.WhatId=orgcon.Id;                         
+                                updateEventRecords.add(eve);
+                            }
+                        }
+                        for(Lead nte: noteRecords){                                             
+                            for(Integer i = 0; i < nte.ContentDocumentLinks.size(); i++){
+                                if(nte.ContentDocumentLinks[i].LinkedEntityId==ler.Id){
+                                    ContentDocumentLink newclnk = nte.ContentDocumentLinks[i].clone();
+                                    newclnk.linkedentityid = orgcon.Id; //This ID is the New Contract Id.
+                                    insertLinks.add(newclnk);
+                                    deleteLinks.add(nte.ContentDocumentLinks[i]);
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+            }         
+          
+       	  system.debug('updateGpEvents'+updateGpEvents);
+            if(updateGpEvents.size()>0){
+                 
+                Update updateGpEvents;
+              
+            }
+             system.debug('updateopps'+updateopps);
+            if(updateopps.size()>0){
+                 
+                Update updateopps;
+            }
+            system.debug('updateleads'+updateleads);
+            if(updateleads.size()>0){
+                  
+                Update updateleads;
+            }
+              system.debug('updateEventRecords'+updateEventRecords);
+            if(updateEventRecords.size()>0){
+                
+                Update updateEventRecords;
+            }
+              system.debug('updateTaskRecords'+updateTaskRecords);
+            if(updateTaskRecords.size()>0){
+                
+                Update updateTaskRecords;
+            } 
+             system.debug('insertLinks'+insertLinks);
+            if(insertLinks.size()>0){     
+                Insert insertLinks; //Insert the new ContentDocumentLink with new Contract.
+            } 		
+            if(deleteLinks.size()>0){  
+               Delete deleteLinks;
+         }
+        }  
+        //Catch block
+        catch(DmlException e) {
+            System.debug('The following exception has occurred: ' + e.getMessage());
+            MH_Logger.get().publish(e.getStackTraceString(),'Error');
+        } 
+    }   
+    global void finish(Database.BatchableContext bc){
+        
+    }    
+}

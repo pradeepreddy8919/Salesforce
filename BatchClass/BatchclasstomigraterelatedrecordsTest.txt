@@ -1,0 +1,89 @@
+@isTest
+public class MH_MigrateGroupLeadstoOrgContactsTest {
+    static testMethod void testMethodMigratebatch(){
+         
+        String LEAD_SOURCE_WEB = 'Web'; 
+    	String LEAD_RT_PROSPECT = 'Prospect';
+        String LEAD_RT_GROUP = 'Group_Lead';
+         
+        //create lead
+        lead newLeads = MH_TestUtility.createLead(LEAD_RT_GROUP, LEAD_SOURCE_WEB);
+        newLeads.MH_Active__c = true;
+        newLeads.FirstName='test lead';
+        newLeads.LastName='hc';
+        newLeads.Street = 'hdsghjds';
+        newLeads.City = 'hf';
+        newLeads.MH_Primary_Language__c = 'English';        
+        newLeads.MH_County__c='cd';       
+        insert newLeads;
+        
+
+        //create another lead
+        lead newLead2 = MH_TestUtility.createLead(LEAD_RT_PROSPECT,LEAD_SOURCE_WEB);
+        newLead2.MH_Group_Lead__c=newLeads.id;
+        insert newLead2;
+        
+        //create a Group Event  
+        MH_Group_Event__c newGroupEvent = MH_TestUtility.createGroupEvent(newLeads.id); 
+        insert newGroupEvent;
+        
+       	Test.startTest();
+        //Create account
+        Account acc = MH_TestUtility.createAccount('Person Account');
+        acc.FirstName = 'test batch'; 
+        insert acc;
+        
+        //create opportunity
+        Opportunity opp = MH_TestUtility.createOpportunity(null, acc);
+         opp.MH_Group_Lead__c=newLeads.id;
+        insert opp;
+        
+        // create task
+        task testTask1 = MH_TestUtility.createTask('Test Subject');
+        testTask1.MH_Call_Outcome_Category__c='Do Not Call';
+        testTask1.MH_Call_Outcome_Disposition__c='Do Not Call';
+        testTask1.MH_Closed_Reason__c = 'Duplicate';
+        testTask1.WhoId=newLeads.id;
+        insert testTask1;
+        
+        // create Event
+        Event objEvent = MH_TestUtility.createEvent(newLeads.Id);
+        objEvent.Subject = MH_ConstantClass.EVENT_SUBJECT_IMA;
+        objEvent.WhoId = newLeads.Id;
+        Insert objEvent;
+        
+        //create Notes
+        ContentVersion content=new ContentVersion(); 
+        content.Title='Header_Picture1'; 
+        content.PathOnClient='/' + content.Title + '.jpg'; 
+        Blob bodyBlob=Blob.valueOf('Unit Test ContentVersion Body'); 
+        content.VersionData=bodyBlob; 
+        content.origin = 'H';
+        insert content;
+        ContentDocumentLink contentlink=new ContentDocumentLink();
+        contentlink.LinkedEntityId=newLeads.id;
+        contentlink.contentdocumentid=[select contentdocumentid from contentversion where id =: content.id].contentdocumentid;
+        contentlink.ShareType = 'I';
+        contentlink.Visibility = 'AllUsers';         
+        insert contentlink;
+        
+        //create organizational contact
+        List<MH_OrganizationalContact__c> Campaignlist=new List<MH_OrganizationalContact__c>(); 
+        MH_OrganizationalContact__c serial = new MH_OrganizationalContact__c();
+        serial.Name = 'test12345';
+        serial.OrganizationalCategory__c='Retail Based';
+        serial.PrefferedLanguage__c='English';
+        serial.PhysicalAddress__c='test address';
+        serial.PhysicalCity__c='test city';
+        serial.PhysicalCounty__c='test country';
+        serial.PhysicalState__c='AZ';
+        serial.PhysicalZip__c='89794';
+        serial.Group_Lead__c=newLeads.Id;
+        insert serial;
+        
+      
+        MH_MigrateGroupLeadstoOrgContacts u = new MH_MigrateGroupLeadstoOrgContacts();
+        Id batchId = Database.executeBatch(u);
+        Test.stopTest();
+    }
+}
