@@ -435,113 +435,128 @@ public class MH_LeadRelatedActivites {
 /***********************************************************************************************
 DYNAMIC Query
 ***************************************************************************************************/
+/***********************************************************************************************
+Name: MH_LeadRelatedActivites
+================================================================================================
+Purpose: This class is used in mhLeadParentRelatedActivites lightning web component 
+to display lead Related parent activities
+=================================================================================================
+History:
+VERSION       AUTHOR            DATE                       DETAIL
+1.0           Nitin kumar     08/08/2022                   Getting account related activites and
+account related opportunities activites
+and child lead activites based on lead 
+***************************************************************************************************/
 public class MH_LeadRelatedActivites {
     public Static String LastActivityDays = Label.LastActivityDays;
     public Static String ActivityLimit = Label.ActivityLimit;
     
     @AuraEnabled
-    public static list<sObject> fetchAccountActivites(string leadid){
-        set<id> AccountIds = getAccountIds(leadid);
-        String accidsString = String.join(new List<Id>(AccountIds), '\',\'');
-        String query = 'Select Id, Name,Physical_Address__c, MH_BirthDate__c,  Phone,(Select ID, Subject, ActivityDate, MH_Call_Outcome_Category__c from Tasks'; 
+    public static list<sObject> fetchAccountActivites(string leadId){
+        set<Id> AccountIds = getAccountIds(leadId);
+        String AccIdsString = String.join(new List<Id>(AccountIds), '\',\'');
+        String query = 'Select Id, Name,Physical_Address__c, MH_BirthDate__c,  Phone,(Select Id, Subject, ActivityDate, MH_Call_Outcome_Category__c from Tasks'; 
         query= query+' WHERE ActivityDate=LAST_N_DAYS:'+LastActivityDays+' limit '+ActivityLimit+'),'; 
-        query= query+' (Select ID, Subject, ActivityDate, MH_Call_Outcome_Category__c from';
+        query= query+' (Select Id, Subject, ActivityDate, MH_Call_Outcome_Category__c from';
         query= query+' Events WHERE ActivityDate=LAST_N_DAYS:'+LastActivityDays+' limit '+ActivityLimit+')';
-        query= query+' from Account where Id IN (\'' + accidsString + '\')'; 
+        query= query+' from Account where Id IN (\'' + AccIdsString + '\')'; 
         list<sObject> acclist= Database.query(query);
         return acclist;
     }
     @AuraEnabled
-    public static list<sObject> fetchOpportunityActivites(string leadid){  
-        set<id> AccountIds = getAccountIds(leadid);
-        List<opportunity> oppId= [SELECT Id from opportunity where AccountId=:AccountIds ];
-        set<id> oppIds = new set<id>();
-        for(opportunity opp : oppId )
+    public static list<sObject> fetchOpportunityActivites(string leadId){  
+        set<Id> AccountIds = getAccountIds(leadId);
+        List<Opportunity> oppId= [SELECT Id from Opportunity where AccountId=:AccountIds ];
+        set<Id> oppIds = new set<Id>();
+        for(Opportunity opp : oppId )
         {
             oppIds.add(opp.Id);
         }
-        String oppidsString = String.join(new List<Id>(oppIds), '\',\'');
-        String query = 'Select Id, Name,(Select ID, Subject, ActivityDate, MH_Call_Outcome_Category__c from Tasks'; 
+        String oppIdsString = String.join(new List<Id>(oppIds), '\',\'');
+        String query = 'Select Id, Name,(Select Id, Subject, ActivityDate, MH_Call_Outcome_Category__c from Tasks'; 
         query= query+' WHERE ActivityDate=LAST_N_DAYS:'+LastActivityDays+' limit '+ActivityLimit+'),'; 
-        query= query+' (Select ID, Subject, ActivityDate, MH_Call_Outcome_Category__c from';
+        query= query+' (Select Id, Subject, ActivityDate, MH_Call_Outcome_Category__c from';
         query= query+' Events WHERE ActivityDate=LAST_N_DAYS:'+LastActivityDays+' limit '+ActivityLimit+')';
-        query= query+' from opportunity where Id IN (\'' + oppidsString + '\')'; 
-        list<sObject> opplist= Database.query(query);
-        return opplist;
+        query= query+' from Opportunity where Id IN (\'' + oppIdsString + '\')'; 
+        list<sObject> Opplist= Database.query(query);
+        return Opplist;
     }
     @AuraEnabled
-    public static list<sObject> fetchLeadActivites(string leadid){
-        set<id> AccountIds = getAccountIds(leadid);
-        List<Lead> childleadIds= [SELECT Id from Lead where HealthCloudGA__RelatedAccount__c=:AccountIds ];
-        set<id> leadIds = new set<id>();
-        for(Lead le : childleadIds )
+    public static list<sObject> fetchLeadActivites(string leadId){
+        set<Id> AccountIds = getAccountIds(leadId);
+        List<Lead> ChildleadIds= [SELECT Id from Lead where HealthCloudGA__RelatedAccount__c=:AccountIds ];
+        set<Id> LeadIds = new set<Id>();
+        for(Lead le : ChildleadIds )
         {
-            leadIds.add(le.Id);
+            LeadIds.add(le.Id);
         }                                                                             
-        String leadidsString = String.join(new List<Id>(leadIds), '\',\'');
-        String query = 'Select Id, Name,(Select ID, Subject, ActivityDate, MH_Call_Outcome_Category__c from Tasks'; 
+        String LeadIdsString = String.join(new List<Id>(LeadIds), '\',\'');
+        String query = 'Select Id, Name,(Select Id, Subject, ActivityDate, MH_Call_Outcome_Category__c from Tasks'; 
         query= query+' WHERE ActivityDate=LAST_N_DAYS:'+LastActivityDays+' limit '+ActivityLimit+'),'; 
-        query= query+' (Select ID, Subject, ActivityDate, MH_Call_Outcome_Category__c from';
+        query= query+' (Select Id, Subject, ActivityDate, MH_Call_Outcome_Category__c from';
         query= query+' Events WHERE ActivityDate=LAST_N_DAYS:'+LastActivityDays+' limit '+ActivityLimit+')';
-        query= query+' from lead where Id IN (\'' + leadidsString + '\')'; 
-        list<sObject> leadlist= Database.query(query);
-        return leadlist;
+        query= query+' from Lead where Id IN (\'' + LeadIdsString + '\')'; 
+        list<sObject> Leadlist= Database.query(query);
+        return Leadlist;
     }
     @AuraEnabled
-    public static list<CampaignMember> fetchCampaignMembers(string leadid){
-        set<id> AccountIds = getAccountIds(leadid);
-        set<id> oppIds = new set<id>();
-        set<id> leadIds = new set<id>();
-        set<id> accIds = new set<id>();
-        List<lead> ConvertedLeads =[Select Id, name, ConvertedAccountId, ConvertedContactId, ConvertedOpportunityId from lead where ConvertedAccountId =:AccountIds ];
-        for(lead le : ConvertedLeads )
-        {
-            accIds.add(le.ConvertedAccountId);
-        }
-        String idsaccString = String.join(new List<Id>(accIds), '\',\'');
-        String CampMemsaccquery = 'SELECT Id, Campaign.Name, CampaignId, Campaign.MH_TFN__c, Campaign.Status,FirstName, PostalCode, State from CampaignMember'; 
-        CampMemsaccquery= CampMemsaccquery+' WHERE ContactId IN (\'' + idsaccString + '\') limit '+ActivityLimit+''; 
-        
-        List<opportunity> childoppIds= [SELECT Id from opportunity where AccountId =:AccountIds ];
-        for(opportunity op : childoppIds )
-        {
-            oppIds.add(op.id);
-        }
-        
-        String idsoppString = String.join(new List<Id>(oppIds), '\',\'');
-        String CampMemsoppquery = 'SELECT Id, Campaign.Name, CampaignId, Campaign.MH_TFN__c, Campaign.Status,FirstName, PostalCode, State from CampaignMember'; 
-        CampMemsoppquery= CampMemsoppquery+' WHERE MH_Opportunity__c IN (\'' + idsoppString + '\') limit '+ActivityLimit+''; 
-        List<Lead> childleadIds= [SELECT Id from Lead where HealthCloudGA__RelatedAccount__c=:AccountIds ];
-        
-        for(Lead le : childleadIds )
-        {
-            leadIds.add(le.Id);
-        }  
-        
-        String idsleadString = String.join(new List<Id>(leadIds), '\',\'');
-        String CampMemsleadquery = 'SELECT Id, Campaign.Name, CampaignId, Campaign.MH_TFN__c, Campaign.Status,FirstName, PostalCode, State from CampaignMember'; 
-        CampMemsleadquery= CampMemsleadquery+' WHERE LeadId IN (\'' + idsleadString + '\') limit '+ActivityLimit+''; 
-        list<CampaignMember> CampMemsacc= Database.query(CampMemsaccquery);
-        list<CampaignMember> CampMemsopp= Database.query(CampMemsoppquery); 
-        list<CampaignMember> CampMemslead= Database.query(CampMemsleadquery);
+    public static list<CampaignMember> fetchCampaignMembers(string leadId){
+        set<Id> AccountIds = getAccountIds(leadId);
         List<sObject> CampMemlist=new List<sObject>();
-        CampMemlist.addAll(CampMemsacc);
-        CampMemlist.addAll(CampMemsopp);
-        CampMemlist.addAll(CampMemslead);
-        return CampMemlist;     
+        set<Id> oppIds = new set<Id>();
+        set<Id> leadIds = new set<Id>();
+        set<Id> accIds = new set<Id>();
+        If(AccountIds.size()>0){
+            List<Lead> ConvertedLeads =[Select Id, Name, ConvertedAccountId, ConvertedContactId, ConvertedOpportunityId from Lead where ConvertedAccountId =:AccountIds ];
+            for(Lead le : ConvertedLeads )
+            {
+                accIds.add(le.ConvertedAccountId);
+            }
+            String IdsAccString = String.join(new List<Id>(accIds), '\',\'');
+            String CampMemsAccquery = 'SELECT Id, Campaign.Name, CampaignId, Campaign.MH_TFN__c, Campaign.Status,FirstName, PostalCode, State from CampaignMember'; 
+            CampMemsAccquery= CampMemsAccquery+' WHERE ContactId IN (\'' + IdsAccString + '\') limit '+ActivityLimit+''; 
+            
+            List<Opportunity> childOppIds= [SELECT Id from Opportunity where AccountId =:AccountIds ];
+            for(Opportunity op : childOppIds )
+            {
+                oppIds.add(op.Id);
+            }
+            
+            String IdsOppString = String.join(new List<Id>(oppIds), '\',\'');
+            String CampMemsoppquery = 'SELECT Id, Campaign.Name, CampaignId, Campaign.MH_TFN__c, Campaign.Status,FirstName, PostalCode, State from CampaignMember'; 
+            CampMemsoppquery= CampMemsoppquery+' WHERE MH_Opportunity__c IN (\'' + IdsOppString + '\') limit '+ActivityLimit+''; 
+            List<Lead> childLeadIds= [SELECT Id from Lead where HealthCloudGA__RelatedAccount__c=:AccountIds ];
+            
+            for(Lead le : childLeadIds )
+            {
+                leadIds.add(le.Id);
+            }  
+            
+            String IdsLeadString = String.join(new List<Id>(leadIds), '\',\'');
+            String CampMemsleadquery = 'SELECT Id, Campaign.Name, CampaignId, Campaign.MH_TFN__c, Campaign.Status,FirstName, PostalCode, State from CampaignMember'; 
+            CampMemsleadquery= CampMemsleadquery+' WHERE LeadId IN (\'' + IdsLeadString + '\') limit '+ActivityLimit+''; 
+            list<CampaignMember> CampMemsacc= Database.query(CampMemsAccquery);
+            list<CampaignMember> CampMemsopp= Database.query(CampMemsoppquery); 
+            list<CampaignMember> CampMemslead= Database.query(CampMemsleadquery);
+            CampMemlist.addAll(CampMemsacc);
+            CampMemlist.addAll(CampMemsopp);
+            CampMemlist.addAll(CampMemslead);
+            
+            return CampMemlist;  
+        }
+        else{
+            return CampMemlist;
+        }
     }
     // get accountIds based on leadId
-    public static Set<Id> getAccountIds(string leadid){
-        List<Lead> AccountId= [SELECT HealthCloudGA__RelatedAccount__c from Lead where id =:leadid AND HealthCloudGA__RelatedAccount__c !=null ];
+    public static Set<Id> getAccountIds(string leadId){
+        List<Lead> AccountId= [SELECT HealthCloudGA__RelatedAccount__c from Lead where Id =:leadId AND HealthCloudGA__RelatedAccount__c !=null ];
         set<Id> AccountIds = new set<Id>();
-        for(lead le : AccountId )
+        for(Lead le : AccountId )
         {
             AccountIds.add(le.HealthCloudGA__RelatedAccount__c);
         }
         return AccountIds;
     }
-    
-    
 }
-
 
