@@ -1,0 +1,27 @@
+ 
+  <lightning-input-field variant="label-hidden" field-name="Phone"
+                                label="Phone" onchange={handleInputChange} onkeypress={handlekeypress} type="tel" value={PhoneValue} 
+                                required="true"> 
+                            </lightning-input-field>
+
+handlekeypress(event){
+      
+	var keycode = (event.which) ? event.which: event.keycode;
+
+	//logic to enter only text values and prevent numbers and special characters
+       if ( (keycode < 65 || keycode > 90) && (keycode < 97 || keycode > 123) && keycode!=32) {
+        if(event.preventDefault){
+            event.preventDefault();
+        }
+        else{
+          return false;
+        }
+
+	//logic to enter only numbers and prevent text and special characters
+	 var charCode = event.which ? event.which : event.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
+    }
