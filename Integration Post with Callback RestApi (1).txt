@@ -1,0 +1,543 @@
+
+
+<template>
+
+</template>
+
+JS************************************************
+
+import { LightningElement, api, wire } from 'lwc';
+import { CurrentPageReference } from 'lightning/navigation';
+import validateopps from '@salesforce/apex/GradiantAIController.validateopp';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { getRecord } from 'lightning/uiRecordApi';
+	
+import { NavigationMixin } from 'lightning/navigation';
+
+const FIELDS = ['Opportunity.Effective_Date__c'];
+export default class GradiantLWC extends NavigationMixin(LightningElement) { 
+
+    recordId;
+    censusCount;
+    effectiveDate;
+
+    // connectedCallback() {
+    //     //code
+    //     console.log('recordid',this.recordId);
+    // }
+
+
+     @wire(getRecord, { recordId: '$recordId', fields: FIELDS })
+    wiredRecord({ error, data }) {
+        if (error) {
+            console.log('error',error);
+        } else if (data) {
+           
+            this.effectiveDate = data.fields.Effective_Date__c.value;
+            
+        }
+    }
+    @wire(CurrentPageReference)
+    getPageReferenceParameters(currentPageReference) {
+        if (currentPageReference) {
+            console.log(currentPageReference);
+            this.recordId = currentPageReference.state.c__recordId;
+            console.log('recordid', this.recordId);
+            this.validateopprecords();
+
+        }
+
+    }
+
+
+    validateopprecords() {
+
+        validateopps({ recId: this.recordId, effectiveDate:this.effectiveDate }).then(data => {
+            // this.censusCount = data;
+            // console.log('censusCount' + this.censusCount);
+            // if (this.censusCount == 0) {
+            //     this.showToast('Error', 'Please upload census records.', 'error');
+            // }
+            // else if (this.censusCount > 0 && this.censusCount < 5) {
+            //     this.showToast('Error', 'Please upload more than 5 census records.', 'error');
+            // }
+            // else if (this.censusCount > 5000) {
+            //     this.showToast('Error', 'Gradient AI cannot process more than 5000 records.', 'error');
+            // }
+           
+            // let currentDate = new Date();
+            // let givenDate = new Date(this.effectiveDate);
+
+            // if(givenDate < currentDate){
+            //      this.showToast('Error', 'Effective Date cannot be a date in the past.', 'error');
+            // }
+                   let response = data;
+
+                   if(response=='Success'){
+
+                        this.showToast('Success', 'Gradient AI api request was submitted successfully.', 'Success');
+                   }
+                   else if(response = 'Failed'){
+                        this.showToast('Error', 'Gradient AI api request failed.Please try again.', 'error');
+                   }
+                   else{
+                   console.log('censusCount' + data);
+                    response.forEach(currentItem => {
+                        this.showToast('Error', currentItem, 'error');
+                    });
+                   }
+
+        });
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: this.recordId,
+                objectApiName: 'Opportunity',
+                actionName: 'view'
+            },
+        });
+
+
+    }
+    showToast(title, message, variant) {
+        const event = new ShowToastEvent({
+            title: title,
+            message: message,
+            variant: variant,
+            mode: 'sticky'
+        });
+        this.dispatchEvent(event);
+    }
+
+}
+
+
+*******************************************apexcontroller******************************************************
+
+
+public class GradiantAIController {
+      private class jobWrap{
+       public String id {get; set;}  
+       public String callbackURL {get; set;}
+       
+    }
+    private class carrierWrap{
+       public String id {get; set;}  
+       public String name {get; set;}
+     //  public String region {get; set;}  
+    }
+    private class peoWrap{
+       public String id {get; set;}  
+       public String name {get; set;}
+       
+    }
+    private class worksiteEmployerWrap{
+       public String id {get; set;}  
+       public String name {get; set;}
+       public String sicCode {get; set;}  
+       public String zipCode {get; set;}
+       public String state {get; set;}
+      // public String fEIN {get; set;} 
+      // public String address {get; set;}
+      // public String phoneNumber {get; set;}
+       
+    }
+    private class proposalWrap{
+       
+       public String id {get; set;}  
+       public String createdAt {get; set;}
+       public Decimal coveredMemberCount {get; set;}  
+       public String masterHealthPlan {get; set;}
+       public String proposedEffectiveDate {get; set;}  
+       public String upcomingRenewalDate {get; set;}
+       public additionalInformationWrap additionalInformation {get; set;}  
+       
+    }
+     private class additionalInformationWrap{
+       public String currentMedicalCarrier {get; set;}  
+       public Boolean isVirginGroup {get; set;}   
+    }
+
+    
+     private class censusRecordWrap{
+       public String id {get; set;}  
+       public String firstName {get; set;}
+       public String lastName {get; set;}  
+       public String birthDate {get; set;}
+       public String gender {get; set;} 
+       public String coverageType {get; set;}   
+       public String zipCode {get; set;}
+       public String dependentType {get; set;}
+       public Boolean isCobra {get; set;}
+       public Boolean isEligible {get; set;}
+       
+       
+    }
+    private class RequestBodyMap {
+        public jobWrap job {get; set;}
+        public carrierWrap carrier {get; set;}
+        public peoWrap peo {get; set;}
+        public worksiteEmployerWrap worksiteEmployer {get; set;}
+        public proposalWrap proposal {get; set;}
+        public list<censusRecordWrap> censusRecords {get; set;}        
+    }
+
+
+   
+    public static string gradiantAIapicallout(String oppId){
+         string returnMsg;
+  Opportunity oppRecs = [select Id, account.Account_Record_Id__c, account.Name,account.Region__c,account.sic,
+                                account.BillingAddress,account.BillingStreet,account.BillingCity,
+                                account.BillingStateCode,account.BillingPostalCode,account.BillingCountry, 
+                                account.FEIN__c,account.Primary_Telephone__c,CreatedById,CreatedDate, 
+                                Enrolled_Members__c,Current_Health_Plan_Funding_Arrangement__c,
+                                Effective_Date__c,CloseDate,
+                                Current_Stop_Loss_Carrier__r.Name from Opportunity where Id =:oppId Limit 1];
+       
+ List<Census_Information__c> censuslist = [select id,Name,First_Name__c,Last_Name__c,Date_of_Birth__c,Gender__c,
+                                            Coverage_Tier_GradientAI__c,Home_Zip_Code__c,
+                                            Relationship_to_Employee_GradientAI__c,
+                                            COBRA_Status_GradientAI__c
+                                             from Census_Information__c where Opportunity__c =:oppId];
+        /**
+             * Request Body
+             */
+
+            string callbackurl =System.URL.getSalesforceBaseURL().toExternalForm()+'/services/apexrest/gradiantAI/';
+            jobWrap job = new jobWrap();
+             job.id = oppRecs.Id !=null ? oppRecs.Id:'' ; // 'd62aeb89-4ede-408e-8515-ffbb1b20f34e';
+             job.callbackURL=callbackurl;
+
+            carrierWrap carrier = new carrierWrap();
+            carrier.id =oppRecs.account.Account_Record_Id__c != null ? oppRecs.account.Account_Record_Id__c:'';// '65374533-8219-5e9e-ae57-b297c896d674';
+            carrier.name= oppRecs.account.Name;
+          //  carrier.region=  oppRecs.account.Region__c;
+
+            peoWrap peo = new peoWrap();
+            peo.id ='sbr';
+            peo.name='sbr';
+
+            worksiteEmployerWrap worksiteEmployer = new worksiteEmployerWrap();
+            worksiteEmployer.id = oppRecs.account.Account_Record_Id__c != null ? oppRecs.account.Account_Record_Id__c:'';   // '999f282a-42ca-5414-94ca-fcc8daca5c5f'; //oppRecs.Id;
+            worksiteEmployer.name= oppRecs.account.Name!= null ? oppRecs.account.Name:'';
+            worksiteEmployer.sicCode = oppRecs.account.sic!=null ? oppRecs.account.sic:'';
+            worksiteEmployer.zipCode=  oppRecs.account.BillingPostalCode != null ? oppRecs.account.BillingPostalCode:'' ; // '80301';
+            worksiteEmployer.state = oppRecs.account.BillingStateCode !=null ? oppRecs.account.BillingStateCode:''; // 'CO'; 
+            //worksiteEmployer.fEIN = oppRecs.account.FEIN__c;
+           // worksiteEmployer.address= oppRecs.account.BillingStreet+','+oppRecs.account.BillingCity;
+           // worksiteEmployer.phoneNumber= oppRecs.account.Primary_Telephone__c;
+
+            
+            additionalInformationWrap additionalInformation =  new additionalInformationWrap();
+            additionalInformation.isVirginGroup = false;
+            additionalInformation.currentMedicalCarrier= oppRecs.Current_Stop_Loss_Carrier__r.Name!=null ? oppRecs.Current_Stop_Loss_Carrier__r.Name :'' ; //'Cigna'
+
+            proposalWrap proposal = new proposalWrap();
+            proposal.additionalInformation = additionalInformation;
+            proposal.id = 'ce4f0a05-c45b-5b2f-a781-ddbfe2f272ce';
+            proposal.createdAt= string.valueOf(oppRecs.CreatedDate);   //'2021-02-19T18:49:47.095Z';//oppRecs.CreatedById;  
+            proposal.coveredMemberCount =  oppRecs.Enrolled_Members__c;  //16 
+            proposal.masterHealthPlan= 'default';    // oppRecs.Current_Health_Plan_Funding_Arrangement__c; // needs to confirm mapping  field value. it is accepting only default value
+            proposal.proposedEffectiveDate = string.valueOf(oppRecs.Effective_Date__c);
+            proposal.upcomingRenewalDate= string.valueOf(oppRecs.CloseDate);
+          
+    
+
+            list<censusRecordWrap> censusRecordwraplist = new list<censusRecordWrap>();
+            for(Census_Information__c cif:censuslist ){
+            censusRecordWrap censusRecords = new censusRecordWrap();
+            censusRecords.id = cif.Name !=null ? cif.Name : '' ;
+            censusRecords.firstName= cif.First_Name__c !=null ? cif.First_Name__c:'';
+            censusRecords.lastName = cif.Last_Name__c!=null ? cif.Last_Name__c:'';
+            censusRecords.birthDate= string.valueOf(cif.Date_of_Birth__c);
+            if(cif.Gender__c=='Male'){
+            censusRecords.gender = 'M';
+            }else if(cif.Gender__c=='Female'){
+               censusRecords.gender = 'F';
+            }           
+            censusRecords.coverageType = 'EE';//cif.Coverage_Tier_GradientAI__c; //'EE';    // needs to confirm mapping  field value. it is accepting only  EE  or ES or EC or FAM value                                
+            censusRecords.zipCode= cif.Home_Zip_Code__c; //'80301'; //
+            censusRecords.dependentType = cif.Relationship_to_Employee_GradientAI__c.toUppercase();  //'SUB';// 
+            censusRecords.isCobra= cif.COBRA_Status_GradientAI__c =='COBRA' ? true:false ; // false; // 
+            censusRecords.isEligible = true;            // needs to confirm this field and mapping field and this field is not there in maapping field list and this is mandatory friled for api call
+            censusRecordwraplist.add(censusRecords);
+            }
+
+
+           RequestBodyMap requestBody = new RequestBodyMap();
+
+           requestBody.job = job;
+           requestBody.carrier = carrier;
+           
+           requestBody.peo = peo;
+           requestBody.worksiteEmployer = worksiteEmployer;
+           
+           requestBody.proposal = proposal;
+           requestBody.censusRecords = censusRecordwraplist;
+                      
+            /**
+             * API CALL OUT
+             */
+            Quote_API__mdt qtMDT = [SELECT BaseURL__c, Endpoint__c, x_api_key__c FROM Quote_API__mdt WHERE DeveloperName='Gradient_AI' LIMIT 1];
+            Http h = new Http();
+            HttpRequest request = new HttpRequest();
+           // req.setEndpoint('callout:Request_Quote_API/'+qtMDT.Endpoint__c);
+            request.setEndpoint(qtMDT.Endpoint__c);
+            request.setMethod('POST');
+            request.setHeader('x-api-key',qtMDT.x_api_key__c);
+            request.setHeader('Content-Type','application/json');
+             String requestBodyAWS = '';
+          
+            try{
+                requestBodyAWS = JSON.serialize(requestBody);
+              
+            }catch(Exception e){
+              System.debug('Got error Response from AWS>>>>>>>>>>>>>'+e);
+              
+            }
+            System.debug('requestBodyAWS>>>>>>>>>>>>>'+requestBodyAWS); 
+            request.setBody(requestBodyAWS);
+
+            HttpResponse response = new HttpResponse();
+            try{
+                response = h.send(request);
+                System.debug('Got 200 Response from AWS>>>>>>>>>>>>>'+response);
+             }catch(Exception e){
+                    System.debug('Got error Response from AWS>>>>>>>>>>>>>'+e);
+
+             }
+          
+            if(response.getStatusCode()==200||response.getStatusCode()==201 ||response.getStatusCode()==202){
+               System.debug('Got 200 Response from AWS>>>>>>>>>>>>>'+response);
+                createChatterFeed(UserInfo.getUserId(), ' Gradient AI api request was submitted successfully.' );
+                returnMsg ='Success';
+            }
+            else{
+                 createChatterFeed(UserInfo.getUserId(), 'Gradient AI api request failed.Please try again.' );
+                  LogCalloutException(String.valueOf(request),oppRecs.Id, String.valueOf(response), 'GradiantAIController', 'gradiantAIapicallout');
+                     returnMsg ='Failed';
+            }
+            return returnMsg;
+         
+        }
+
+         public static void createChatterFeed(String userId, String bodymsg)
+    {
+           
+            ConnectApi.MessageBodyInput messageInput = new ConnectApi.MessageBodyInput();
+            messageInput.messageSegments = new List<ConnectApi.MessageSegmentInput>();
+         
+            // add some text before the mention
+            ConnectApi.TextSegmentInput textSegment = new ConnectApi.TextSegmentInput();
+            textSegment.text = bodymsg;
+            messageInput.messageSegments.add(textSegment);
+         
+         
+            ConnectApi.FeedItemInput input = new ConnectApi.FeedItemInput();
+            input.body = messageInput;
+            input.subjectId = userId;
+         
+            // post it
+            //ConnectApi.ChatterFeeds.postFeedItem(null, ConnectApi.FeedType.UserProfile, request.userId, input, null); 
+            ConnectApi.ChatterFeeds.postFeedElement(null, input);
+    }
+
+     @auraenabled
+    public static List<string> validateopp(String recId, Date effectiveDate){
+        //Boolean validate = true;
+        //integer censusCount;
+        List<string> errormsg = new list<string>(); 
+        List<Census_Information__c> censuslist = [select id from Census_Information__c where Opportunity__c =:recId];
+       // if(censuslist.size()==0){
+        //    validate = false;
+            
+       // }
+           if(censuslist.size() == 0) {
+                errormsg.add('Please upload census records.');
+            }
+            else if(censuslist.size() > 0 && censuslist.size() < 5) {
+                errormsg.add('Please upload more than 5 census records.');
+            }
+            else if(censuslist.size() > 5000) {
+                errormsg.add('Gradient AI cannot process more than 5000 records.');
+            }
+           
+            // let currentDate = new Date();
+            // let givenDate = new Date(this.effectiveDate);
+
+            if(effectiveDate < system.TODAY() ){
+                 errormsg.add('Effective Date cannot be a date in the past.');
+            }
+      //  censusCount = censuslist.size();
+       	if(errormsg.isempty()){
+              string returnResp =  gradiantAIapicallout(recId);
+               system.debug('returnResp'+returnResp);
+               errormsg.add(returnResp);
+               return errormsg;
+          }
+          else{
+              
+               return errormsg;
+          }
+        
+    }
+
+       public static void LogCalloutException(String request, Id OpportunityId , String e, String className, String methodName){
+            IntakeFormLog__c exc = new IntakeFormLog__c();
+            exc.Opportunity__c = OpportunityId;
+            exc.MethodName__c = methodName;
+            exc.Message__c = request;
+            exc.ClassName__c = className;
+            exc.Error__c = true;
+            exc.Source__c = 'Gradiant API';
+            exc.Stack_Trace__c =  e;
+            Database.insert(exc); 
+        }
+    
+
+}
+
+
+
+
+**********************************apexcallback*******************************************************************************************8
+
+
+@RestResource(urlMapping='/gradiantAI/')
+global class gradiantAICallback{ 
+   @httpPost
+    global static string doPostMethod(String jobID, sailResultWrap sailResults, censusResultsWrap censusResults ){
+        //  RestRequest req = RestContext.request;
+        //  system.debug(req+ req);
+        GradientAI_Results__c gaiRes = new GradientAI_Results__c();
+        gaiRes.SAIL_Score__c = sailResults.score;
+        gaiRes.Morbidity_Score__c = sailResults.morbidity;
+        gaiRes.Census_Score__c = censusResults.score;
+        insert gaiRes;
+    list<Individual_Risk_Tier__c>individualRisklist = new list<Individual_Risk_Tier__c>();
+    for(individualRiskTierWrap inrt: sailResults.breakdown.individualRiskTiers) {   
+    Individual_Risk_Tier__c indRT= new Individual_Risk_Tier__c();
+    indRT.LowerBound__c = inrt.lowerBound;
+    indRT.UpperBound__c = inrt.upperBound;
+    indRT.NumberOfIndividuals__c = inrt.numIndividuals;
+    indRt.GradientAIResultID__c = gaiRes.Id;
+    indRT.Range__c= inrt.rangeLabel;
+     
+         individualRisklist.add(indRT);
+    }
+     if(!individualRisklist.isEmpty()){
+    insert individualRisklist;
+    }
+    list<Drug_Cost_Drivers__c>drugCostDriverslist = new list<Drug_Cost_Drivers__c>();  
+     for(drugCostDriversWrap drgCost: sailResults.drugCostDrivers) {   
+    Drug_Cost_Drivers__c dct = new Drug_Cost_Drivers__c();
+    dct.Rank__c = drgCost.rank;
+    dct.Year__c = drgCost.year;
+    dct.Code__c = drgCost.code;
+    dct.Type__c = drgCost.codeType;
+    dct.Drug_Name__c = drgCost.name;
+    dct.Drug_Class__c= drgCost.drugClass;
+    dct.Unique_Member_ID__c= drgCost.uniqueMemberID;
+    dct.GradientAI_Result_ID__c = gaiRes.Id;
+  //  dct.Unique_Member_ID__c= inrt.highCostClaimantID;
+     
+         drugCostDriverslist.add(dct);
+    }
+    
+    if(!drugCostDriverslist.isEmpty()){
+    insert drugCostDriverslist;
+    }
+     list<ICD10_Triggers__c>icdTriggerslist = new list<ICD10_Triggers__c>();  
+     for(icd10TriggersWrap icdtrig : sailResults.icd10Triggers) {   
+    ICD10_Triggers__c icd = new ICD10_Triggers__c();
+    icd.ICD10_Code__c = icdtrig.icd10;
+    icd.ICD10_Description__c = icdtrig.description;
+    icd.Year__c = icdtrig.year;
+    icd.Unique_Member_ID__c = icdtrig.uniqueMemberID;
+   // icd.Drug_Name__c = highCostClaimantID;
+    icd.GradientAI_Result_ID__c = gaiRes.Id;   
+         icdTriggerslist.add(icd);
+    }
+    if(!icdTriggerslist.isEmpty()){
+    insert icdTriggerslist;
+    }
+       list<Predicted_High_Cost_Claimants__c>predHighCostlist = new list<Predicted_High_Cost_Claimants__c>();  
+     for(highCostPredictionsWrap hcostp : sailResults.highCostPredictions) {   
+    Predicted_High_Cost_Claimants__c hcp = new Predicted_High_Cost_Claimants__c();
+    hcp.Predicted_High_Cost_Claimant_Amount__c = hcostp.predictionAmount;
+    hcp.Unique_Member_ID__c = hcostp.uniqueMemberID;
+   // icd.Year__c = icdtrig.highCostClaimantID;
+    hcp.GradientAI_Result_ID__c = gaiRes.Id;   
+         predHighCostlist.add(hcp);
+    }
+        
+
+    if(!predHighCostlist.isEmpty()){
+    insert predHighCostlist;
+    }
+
+    return 'sucesss';
+}
+
+   global class breakdownWrap{
+       global list<individualRiskTierWrap> individualRiskTiers ;    
+       
+    }
+
+     global class sailResultWrap {
+        global Decimal score ;  
+        global Decimal hitRate ;
+        global Decimal morbidity ;
+        global breakdownWrap breakdown ;
+        global list<drugCostDriversWrap> drugCostDrivers;
+        global list<icd10TriggersWrap> icd10Triggers;
+        global list<highCostPredictionsWrap> highCostPredictions;
+       
+      
+            
+    }
+     global class individualRiskTierWrap {
+        global Decimal lowerBound ;  
+        global Decimal upperBound ;
+        global Integer numIndividuals ;
+        global String rangeLabel ;
+       
+    }
+     global class drugCostDriversWrap {
+        global string condition; 
+        global Integer rank ;  
+        global String year ;
+        global String code ;
+        global String codeType ;
+        global String name ;  
+        global String drugClass ;
+        global String uniqueMemberID ;
+        global String highCostClaimantID ;
+       
+    }
+    global class icd10TriggersWrap {
+        global String icd10 ;  
+        global String description ;
+        global String year ;
+        global String uniqueMemberID ;
+        global String highCostClaimantID ;
+       
+    }
+     global class highCostPredictionsWrap {
+        global Double predictionAmount ;  
+        global String uniqueMemberID ;
+        global Integer highCostClaimantID ; 
+    }
+       global class censusResultsWrap {  
+        global Decimal score ; 
+    }
+      global class requestBody {  
+        global string jobID;
+        global sailResultWrap sailResults;
+        global censusResultsWrap censusResults;
+    }
+}
+
+
+
+

@@ -1,0 +1,125 @@
+<template>
+    <template if:true={showrecapcha}>
+    <iframe src={navigateTo} name="captchaFrame" style="border: none; width: 100%; margin-left: 800px;" onload={captchaLoaded}></iframe>
+    </template>
+</template>
+
+
+
+****************************************js*********************************
+
+
+
+import { LightningElement, track,api,wire } from 'lwc';
+import pageUrl from '@salesforce/resourceUrl/reCaptchav2';
+
+export default class ReCaptchaLWCV2 extends LightningElement {
+    showrecapcha;
+     @track navigateTo;
+    connectedCallback() {
+        //code
+      //  super();
+         this.listenForMessage = function(message) {
+      // Access otherMethod()
+      this.handAnswer(message);
+    }.bind(this);
+        this.navigateTo = pageUrl;
+        window.addEventListener("message", this.listenForMessage);//add event listener for message that we post in our recaptchaV2 static resource html file.
+        this.showrecapcha = true;
+       
+    }
+ 
+    captchaLoaded(event){
+        if(event.target.getAttribute('src') == pageUrl){
+            console.log('Google reCAPTCHA is loaded.');
+        } 
+       
+    }
+ 
+    listenForMessage(message){
+        console.log('message data : ' + message.data);//message.data - The object passed from the other window.
+        console.log('message origin : ' + message.origin);//message.origin - The origin of the window that sent the message at the time postMessage was called.
+               const listener = function() {
+      // Access otherMethod()
+      this.handAnswer();
+    }.bind(this);
+       
+         console.log('testt124');
+    }
+handAnswer(message){
+    console.log('message data : ' + message.data);//message.data - The object passed from the other window.
+    console.log('message origin : ' + message.origin);
+     this.anothermethod(message);
+}
+  anothermethod(message){
+            console.log('testt233');
+             // let msg = 'captcha success';
+      //   console.log('message data : ' + typeof(message));
+          if(message.data =='captcha success'){
+
+              this.dispatchEvent(new CustomEvent('callparent', {
+            detail: {
+                message: message,
+            }
+        }));
+          }
+    }
+
+
+}
+
+
+
+
+
+*********staitc resorce*******************
+
+
+
+<html>
+  <head>
+    <title>reCAPTCHA demo: Simple page</title>
+     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+	 <style>
+.button1 {
+    background-color: #0176d3;
+    border: none;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 13px;
+    font-family: system-ui;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+</style>
+  </head>
+  <body>
+    <form action="?" onsubmit="return validateForm()" method="POST">
+      <div class="g-recaptcha" data-sitekey="6LfQZU0mAAAAAD9LvCY1tAyH0WOKMxXr3NQRmgMJ"></div>
+      <br/>
+	  <button class="button1" type="submit">Submit</button>
+      
+    </form>
+ 
+    <script type="text/javascript">
+        function validateForm(){
+ 
+            if(grecaptcha.getResponse().length == 0){
+                alert('Please click the reCAPTCHA checkbox');
+                parent.postMessage("captcha failed", location.origin);
+                return false;
+            }
+            parent.postMessage("captcha success", location.origin);
+            return true;
+        }
+    </script>
+  </body>
+</html>
+
+
+
