@@ -115,63 +115,66 @@ export default class GradiantLWC extends NavigationMixin(LightningElement) {
 *******************************************apexcontroller******************************************************
 
 
+/**                                                             
+*  this class used to send opportunity and related cesus records data to gradiant AI thorught API           
+*/    
 public class GradiantAIController {
-      private class jobWrap{
-       public String id {get; set;}  
-       public String callbackURL {get; set;}
-       
+    
+    /**                                                             
+*  wrapper class to generate Response body for API call out           
+*/
+    
+    private class jobWrap{
+        public String id {get; set;}  
+        public String callbackURL {get; set;}
+        
     }
     private class carrierWrap{
-       public String id {get; set;}  
-       public String name {get; set;}
-     //  public String region {get; set;}  
+        public String id {get; set;}  
+        public String name {get; set;}
     }
     private class peoWrap{
-       public String id {get; set;}  
-       public String name {get; set;}
-       
+        public String id {get; set;}  
+        public String name {get; set;}
+        
     }
     private class worksiteEmployerWrap{
-       public String id {get; set;}  
-       public String name {get; set;}
-       public String sicCode {get; set;}  
-       public String zipCode {get; set;}
-       public String state {get; set;}
-      // public String fEIN {get; set;} 
-      // public String address {get; set;}
-      // public String phoneNumber {get; set;}
-       
+        public String id {get; set;}  
+        public String name {get; set;}
+        public String sicCode {get; set;}  
+        public String zipCode {get; set;}
+        public String state {get; set;}
     }
     private class proposalWrap{
-       
-       public String id {get; set;}  
-       public String createdAt {get; set;}
-       public Decimal coveredMemberCount {get; set;}  
-       public String masterHealthPlan {get; set;}
-       public String proposedEffectiveDate {get; set;}  
-       public String upcomingRenewalDate {get; set;}
-       public additionalInformationWrap additionalInformation {get; set;}  
-       
+        
+        public String id {get; set;}  
+        public String createdAt {get; set;}
+        public Decimal coveredMemberCount {get; set;}  
+        public String masterHealthPlan {get; set;}
+        public String proposedEffectiveDate {get; set;}  
+        public String upcomingRenewalDate {get; set;}
+        public additionalInformationWrap additionalInformation {get; set;}  
+        
     }
-     private class additionalInformationWrap{
-       public String currentMedicalCarrier {get; set;}  
-       public Boolean isVirginGroup {get; set;}   
+    private class additionalInformationWrap{
+        public String currentMedicalCarrier {get; set;}  
+        public Boolean isVirginGroup {get; set;}   
     }
-
     
-     private class censusRecordWrap{
-       public String id {get; set;}  
-       public String firstName {get; set;}
-       public String lastName {get; set;}  
-       public String birthDate {get; set;}
-       public String gender {get; set;} 
-       public String coverageType {get; set;}   
-       public String zipCode {get; set;}
-       public String dependentType {get; set;}
-       public Boolean isCobra {get; set;}
-       public Boolean isEligible {get; set;}
-       
-       
+    
+    private class censusRecordWrap{
+        public String id {get; set;}  
+        public String firstName {get; set;}
+        public String lastName {get; set;}  
+        public String birthDate {get; set;}
+        public String gender {get; set;} 
+        public String coverageType {get; set;}   
+        public String zipCode {get; set;}
+        public String dependentType {get; set;}
+        public Boolean isCobra {get; set;}
+        public Boolean isEligible {get; set;}
+        
+        
     }
     private class RequestBodyMap {
         public jobWrap job {get; set;}
@@ -181,178 +184,186 @@ public class GradiantAIController {
         public proposalWrap proposal {get; set;}
         public list<censusRecordWrap> censusRecords {get; set;}        
     }
-
-
-   
-    public static string gradiantAIapicallout(String oppId){
-         string returnMsg;
-  Opportunity oppRecs = [select Id, account.Account_Record_Id__c, account.Name,account.Region__c,account.sic,
-                                account.BillingAddress,account.BillingStreet,account.BillingCity,
-                                account.BillingStateCode,account.BillingPostalCode,account.BillingCountry, 
-                                account.FEIN__c,account.Primary_Telephone__c,CreatedById,CreatedDate, 
-                                Enrolled_Members__c,Current_Health_Plan_Funding_Arrangement__c,
-                                Effective_Date__c,CloseDate,
-                                Current_Stop_Loss_Carrier__r.Name from Opportunity where Id =:oppId Limit 1];
-       
- List<Census_Information__c> censuslist = [select id,Name,First_Name__c,Last_Name__c,Date_of_Birth__c,Gender__c,
-                                            Coverage_Tier_GradientAI__c,Home_Zip_Code__c,
-                                            Relationship_to_Employee_GradientAI__c,
-                                            COBRA_Status_GradientAI__c
-                                             from Census_Information__c where Opportunity__c =:oppId];
-        /**
-             * Request Body
-             */
-
-            string callbackurl =System.URL.getSalesforceBaseURL().toExternalForm()+'/services/apexrest/gradiantAI/';
-            jobWrap job = new jobWrap();
-             job.id = oppRecs.Id !=null ? oppRecs.Id:'' ; // 'd62aeb89-4ede-408e-8515-ffbb1b20f34e';
-             job.callbackURL=callbackurl;
-
-            carrierWrap carrier = new carrierWrap();
-            carrier.id =oppRecs.account.Account_Record_Id__c != null ? oppRecs.account.Account_Record_Id__c:'';// '65374533-8219-5e9e-ae57-b297c896d674';
-            carrier.name= oppRecs.account.Name;
-          //  carrier.region=  oppRecs.account.Region__c;
-
-            peoWrap peo = new peoWrap();
-            peo.id ='sbr';
-            peo.name='sbr';
-
-            worksiteEmployerWrap worksiteEmployer = new worksiteEmployerWrap();
-            worksiteEmployer.id = oppRecs.account.Account_Record_Id__c != null ? oppRecs.account.Account_Record_Id__c:'';   // '999f282a-42ca-5414-94ca-fcc8daca5c5f'; //oppRecs.Id;
-            worksiteEmployer.name= oppRecs.account.Name!= null ? oppRecs.account.Name:'';
-            worksiteEmployer.sicCode = oppRecs.account.sic!=null ? oppRecs.account.sic:'';
-            worksiteEmployer.zipCode=  oppRecs.account.BillingPostalCode != null ? oppRecs.account.BillingPostalCode:'' ; // '80301';
-            worksiteEmployer.state = oppRecs.account.BillingStateCode !=null ? oppRecs.account.BillingStateCode:''; // 'CO'; 
-            //worksiteEmployer.fEIN = oppRecs.account.FEIN__c;
-           // worksiteEmployer.address= oppRecs.account.BillingStreet+','+oppRecs.account.BillingCity;
-           // worksiteEmployer.phoneNumber= oppRecs.account.Primary_Telephone__c;
-
-            
-            additionalInformationWrap additionalInformation =  new additionalInformationWrap();
-            additionalInformation.isVirginGroup = false;
-            additionalInformation.currentMedicalCarrier= oppRecs.Current_Stop_Loss_Carrier__r.Name!=null ? oppRecs.Current_Stop_Loss_Carrier__r.Name :'' ; //'Cigna'
-
-            proposalWrap proposal = new proposalWrap();
-            proposal.additionalInformation = additionalInformation;
-            proposal.id = 'ce4f0a05-c45b-5b2f-a781-ddbfe2f272ce';
-            proposal.createdAt= string.valueOf(oppRecs.CreatedDate);   //'2021-02-19T18:49:47.095Z';//oppRecs.CreatedById;  
-            proposal.coveredMemberCount =  oppRecs.Enrolled_Members__c;  //16 
-            proposal.masterHealthPlan= 'default';    // oppRecs.Current_Health_Plan_Funding_Arrangement__c; // needs to confirm mapping  field value. it is accepting only default value
-            proposal.proposedEffectiveDate = string.valueOf(oppRecs.Effective_Date__c);
-            proposal.upcomingRenewalDate= string.valueOf(oppRecs.CloseDate);
-          
     
-
-            list<censusRecordWrap> censusRecordwraplist = new list<censusRecordWrap>();
-            for(Census_Information__c cif:censuslist ){
+    private class returnResponse{
+        public Integer response {get; set;}  
+        public List<string> errormsg {get; set;}
+    }
+    private class returnBody{
+        public String requestId {get; set;}  
+    }
+    
+    /**                                                             
+*  Below method prepares the JSON Body Response and sending API call out to gradiant API 
+*/  
+    public static Integer gradiantAIapicallout(String oppId){
+        
+        Opportunity oppRecs = [select Id, account.Account_Record_Id__c, account.Name,account.Region__c,account.sic,
+                               account.BillingAddress,account.BillingStreet,account.BillingCity,
+                               account.BillingStateCode,account.BillingPostalCode,account.BillingCountry, 
+                               account.FEIN__c,account.Primary_Telephone__c,CreatedById,CreatedDate, 
+                               Enrolled_Members__c,Current_Health_Plan_Funding_Arrangement__c,
+                               Effective_Date__c,CloseDate, Current_Stop_Loss_Carrier__r.Name,
+                               (select id,Name,First_Name__c,Last_Name__c,Date_of_Birth__c,Gender__c,
+                                Coverage_Tier_GradientAI__c,Home_Zip_Code__c, Relationship_to_Employee_GradientAI__c,
+                                COBRA_Status_GradientAI__c from Census_Information__r)from Opportunity where Id =:oppId Limit 1];
+        List<Census_Information__c> censuslist = oppRecs.Census_Information__r;
+        
+        /**
+* Request Body
+*/ 
+        string callbackurl = System.URL.getSalesforceBaseURL().toExternalForm()+'/services/apexrest/gradiantAI/';
+        jobWrap job = new jobWrap();
+        job.id = oppRecs.Id !=null ? oppRecs.Id+'_'+System.today():'' ;
+        job.callbackURL=callbackurl;
+        
+        carrierWrap carrier = new carrierWrap();
+        carrier.id =oppRecs.account.Account_Record_Id__c != null ? oppRecs.account.Account_Record_Id__c:'';
+        carrier.name= oppRecs.account.Name;
+        
+        peoWrap peo = new peoWrap();
+        peo.id ='sbr'; // no mapping field in sheet, hardcoded from sheet value 
+        peo.name='sbr'; // no mapping field in sheet, hardcoded from sheet value 
+        
+        worksiteEmployerWrap worksiteEmployer = new worksiteEmployerWrap();
+        worksiteEmployer.id = oppRecs.account.Account_Record_Id__c != null ? oppRecs.account.Account_Record_Id__c:'';   
+        worksiteEmployer.name= oppRecs.account.Name!= null ? oppRecs.account.Name:'';
+        worksiteEmployer.sicCode = oppRecs.account.sic!=null ? oppRecs.account.sic:'';
+        worksiteEmployer.zipCode=  oppRecs.account.BillingPostalCode != null ? oppRecs.account.BillingPostalCode:'' ; 
+        worksiteEmployer.state = oppRecs.account.BillingStateCode !=null ? oppRecs.account.BillingStateCode:''; 
+        
+        additionalInformationWrap additionalInformation =  new additionalInformationWrap();
+        additionalInformation.isVirginGroup = false; // no mapping field in sheet, accepts on boolean. hardcoded value as false. 
+        additionalInformation.currentMedicalCarrier= oppRecs.Current_Stop_Loss_Carrier__r.Name!=null ? oppRecs.Current_Stop_Loss_Carrier__r.Name :'' ;
+        
+        proposalWrap proposal = new proposalWrap();
+        proposal.additionalInformation = additionalInformation;
+        proposal.id = oppRecs.Id !=null ? oppRecs.Id:'';   //'ce4f0a05-c45b-5b2f-a781-ddbfe2f272ce'; // no mapping field in sheet, hardcoded from sheet value 
+        proposal.createdAt= string.valueOf(oppRecs.CreatedDate);
+        proposal.coveredMemberCount =  oppRecs.Enrolled_Members__c;  
+        proposal.masterHealthPlan= 'default';    // oppRecs.Current_Health_Plan_Funding_Arrangement__c is a picklist field and doesn't have default as value. it is accepting only default as value
+        proposal.proposedEffectiveDate = string.valueOf(oppRecs.Effective_Date__c);
+        proposal.upcomingRenewalDate= string.valueOf(oppRecs.CloseDate);
+        
+        list<censusRecordWrap> censusRecordwraplist = new list<censusRecordWrap>();
+        for(Census_Information__c cif:censuslist ){
             censusRecordWrap censusRecords = new censusRecordWrap();
             censusRecords.id = cif.Name !=null ? cif.Name : '' ;
             censusRecords.firstName= cif.First_Name__c !=null ? cif.First_Name__c:'';
             censusRecords.lastName = cif.Last_Name__c!=null ? cif.Last_Name__c:'';
             censusRecords.birthDate= string.valueOf(cif.Date_of_Birth__c);
             if(cif.Gender__c=='Male'){
-            censusRecords.gender = 'M';
+                censusRecords.gender = 'M';
             }else if(cif.Gender__c=='Female'){
-               censusRecords.gender = 'F';
+                censusRecords.gender = 'F';
             }           
-            censusRecords.coverageType = 'EE';//cif.Coverage_Tier_GradientAI__c; //'EE';    // needs to confirm mapping  field value. it is accepting only  EE  or ES or EC or FAM value                                
-            censusRecords.zipCode= cif.Home_Zip_Code__c; //'80301'; //
-            censusRecords.dependentType = cif.Relationship_to_Employee_GradientAI__c.toUppercase();  //'SUB';// 
-            censusRecords.isCobra= cif.COBRA_Status_GradientAI__c =='COBRA' ? true:false ; // false; // 
-            censusRecords.isEligible = true;            // needs to confirm this field and mapping field and this field is not there in maapping field list and this is mandatory friled for api call
+            censusRecords.coverageType = cif.Coverage_Tier_GradientAI__c;  //    // needs to confirm mapping  field value. it is accepting only  EE  or ES or EC or FAM value  
+            censusRecords.zipCode= cif.Home_Zip_Code__c;
+            censusRecords.dependentType = cif.Relationship_to_Employee_GradientAI__c.toUppercase();  
+            censusRecords.isCobra= cif.COBRA_Status_GradientAI__c =='COBRA' ? true:false ; 
+            censusRecords.isEligible = true ;          // needs to confirm this field and mapping field and this field is not there in maapping field list and this is mandatory field for api call
             censusRecordwraplist.add(censusRecords);
-            }
-
-
-           RequestBodyMap requestBody = new RequestBodyMap();
-
-           requestBody.job = job;
-           requestBody.carrier = carrier;
-           
-           requestBody.peo = peo;
-           requestBody.worksiteEmployer = worksiteEmployer;
-           
-           requestBody.proposal = proposal;
-           requestBody.censusRecords = censusRecordwraplist;
-                      
-            /**
-             * API CALL OUT
-             */
-            Quote_API__mdt qtMDT = [SELECT BaseURL__c, Endpoint__c, x_api_key__c FROM Quote_API__mdt WHERE DeveloperName='Gradient_AI' LIMIT 1];
+        }
+        
+        
+        RequestBodyMap requestBody = new RequestBodyMap();      
+        requestBody.job = job;
+        requestBody.carrier = carrier;      
+        requestBody.peo = peo;
+        requestBody.worksiteEmployer = worksiteEmployer;      
+        requestBody.proposal = proposal;
+        requestBody.censusRecords = censusRecordwraplist;
+        
+        /**
+* API CALL OUT
+*/
+        Integer returnresponse = 0;
+        
+        List<Quote_API__mdt> qtMDT = [SELECT BaseURL__c, Endpoint__c, x_api_key__c FROM Quote_API__mdt WHERE DeveloperName='Gradient_AI' LIMIT 1];
+        
+        if(!qtMDT.isEmpty()){
             Http h = new Http();
             HttpRequest request = new HttpRequest();
-           // req.setEndpoint('callout:Request_Quote_API/'+qtMDT.Endpoint__c);
-            request.setEndpoint(qtMDT.Endpoint__c);
+            request.setEndpoint(qtMDT[0].Endpoint__c);
             request.setMethod('POST');
-            request.setHeader('x-api-key',qtMDT.x_api_key__c);
+            request.setHeader('x-api-key',qtMDT[0].x_api_key__c);
             request.setHeader('Content-Type','application/json');
-             String requestBodyAWS = '';
-          
-            try{
-                requestBodyAWS = JSON.serialize(requestBody);
-              
-            }catch(Exception e){
-              System.debug('Got error Response from AWS>>>>>>>>>>>>>'+e);
-              
-            }
-            System.debug('requestBodyAWS>>>>>>>>>>>>>'+requestBodyAWS); 
+            String requestBodyAWS = '';
+            
+            requestBodyAWS = JSON.serialize(requestBody);  
+            system.debug('requestBodyAWS'+requestBodyAWS);     
             request.setBody(requestBodyAWS);
-
-            HttpResponse response = new HttpResponse();
+            HttpResponse response;
             try{
                 response = h.send(request);
-                System.debug('Got 200 Response from AWS>>>>>>>>>>>>>'+response);
-             }catch(Exception e){
-                    System.debug('Got error Response from AWS>>>>>>>>>>>>>'+e);
-
-             }
-          
+            }catch(Exception e){
+                MDSLQuoteException.LogAPIException(e.getMessage(), oppRecs.Id, 'SF', 'Request Quote', 'GradiantAIController', 'gradiantAIapicallout', String.valueOf(response.getStatusCode()), true, e.getMessage(), 'SF to Gradiant AI callout failed! Please contact support.', '', null);
+            }
+            
+            
+            returnresponse = response.getStatusCode();
+            string returnbody = response.getBody();
+            //   list<string> requestid = response.getBody().split(',');
+            System.debug('returnresponse1234'+returnbody);
+            System.debug('returnresponsecode'+returnresponse);
             if(response.getStatusCode()==200||response.getStatusCode()==201 ||response.getStatusCode()==202){
-               System.debug('Got 200 Response from AWS>>>>>>>>>>>>>'+response);
-                createChatterFeed(UserInfo.getUserId(), ' Gradient AI api request was submitted successfully.' );
-                returnMsg ='Success';
+                Map<String, Object> result = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
+                if (result.containsKey('RequestID')) {
+                    //TODO: verify request id for the request
+                    String RequestID = (String)result.get('RequestID');
+                    opportunity opp = new opportunity();
+                    opp.Id= oppId;
+                    opp.GradientAIRequestID__c=RequestID;
+                    
+                    Database.SaveResult oppResults = Database.update(opp,false);
+                    sendCallbackNotificationlater(oppRecs.Id);
+                    
+                }
+                
+                createChatterFeed(UserInfo.getUserId(), 'Gradient AI api request was submitted successfully.' );          
             }
             else{
-                 createChatterFeed(UserInfo.getUserId(), 'Gradient AI api request failed.Please try again.' );
-                  LogCalloutException(String.valueOf(request),oppRecs.Id, String.valueOf(response), 'GradiantAIController', 'gradiantAIapicallout');
-                     returnMsg ='Failed';
+                createChatterFeed(UserInfo.getUserId(), 'Gradient AI api request failed.Please try again.' );
+                MDSLQuoteException.LogAPIException(String.valueOf(request), oppRecs.Id, 'SF', 'Request Quote', 'GradiantAIController', 'gradiantAIapicallout', String.valueOf(response.getStatusCode()), true, String.valueOf(response), 'SF to Gradiant AI callout failed! Please contact support.', '', null);         
             }
-            return returnMsg;
-         
+            return returnresponse;
         }
-
-         public static void createChatterFeed(String userId, String bodymsg)
-    {
-           
-            ConnectApi.MessageBodyInput messageInput = new ConnectApi.MessageBodyInput();
-            messageInput.messageSegments = new List<ConnectApi.MessageSegmentInput>();
-         
-            // add some text before the mention
-            ConnectApi.TextSegmentInput textSegment = new ConnectApi.TextSegmentInput();
-            textSegment.text = bodymsg;
-            messageInput.messageSegments.add(textSegment);
-         
-         
-            ConnectApi.FeedItemInput input = new ConnectApi.FeedItemInput();
-            input.body = messageInput;
-            input.subjectId = userId;
-         
-            // post it
-            //ConnectApi.ChatterFeeds.postFeedItem(null, ConnectApi.FeedType.UserProfile, request.userId, input, null); 
-            ConnectApi.ChatterFeeds.postFeedElement(null, input);
+        else{
+            return returnresponse;
+        }
     }
-
-     @auraenabled
-    public static List<string> validateopp(String recId, Date effectiveDate){
-        //Boolean validate = true;
-        //integer censusCount;
-        List<string> errormsg = new list<string>(); 
-        List<Census_Information__c> censuslist = [select id from Census_Information__c where Opportunity__c =:recId];
-       // if(censuslist.size()==0){
-        //    validate = false;
+    
+    /**                                                             
+*  Below method is used to create chatter notification for the user  
+*/
+    public static void createChatterFeed(String userId, String bodymsg)
+    {
+        
+        ConnectApi.MessageBodyInput messageInput = new ConnectApi.MessageBodyInput();
+        messageInput.messageSegments = new List<ConnectApi.MessageSegmentInput>();
+        
+        ConnectApi.TextSegmentInput textSegment = new ConnectApi.TextSegmentInput();
+        textSegment.text = bodymsg;
+        messageInput.messageSegments.add(textSegment);     
+        ConnectApi.FeedItemInput input = new ConnectApi.FeedItemInput();
+        input.body = messageInput;
+        input.subjectId = userId;
+        ConnectApi.ChatterFeeds.postFeedElement(null, input);
+    }
+    
+    
+    
+    /**                                                             
+*  Below method called from lwc when click on button Run Gradiant AI  and valiate the entry criteria  
+*/
+    @AuraEnabled
+    public static String validateopp(String recId, Date effectiveDate){
+        try{
+            List<string> errormsg = new list<string>(); 
+            returnResponse retrnres = new returnResponse();
+            List<Census_Information__c> censuslist = [select id from Census_Information__c where Opportunity__c =:recId];
             
-       // }
-           if(censuslist.size() == 0) {
+            if(censuslist.size() == 0) {
                 errormsg.add('Please upload census records.');
             }
             else if(censuslist.size() > 0 && censuslist.size() < 5) {
@@ -361,46 +372,46 @@ public class GradiantAIController {
             else if(censuslist.size() > 5000) {
                 errormsg.add('Gradient AI cannot process more than 5000 records.');
             }
-           
-            // let currentDate = new Date();
-            // let givenDate = new Date(this.effectiveDate);
-
-            if(effectiveDate < system.TODAY() ){
-                 errormsg.add('Effective Date cannot be a date in the past.');
+            
+            if(effectiveDate < SYSTEM.TODAY() ){
+                errormsg.add('Effective Date cannot be a date in the past.');
             }
-      //  censusCount = censuslist.size();
-       	if(errormsg.isempty()){
-              string returnResp =  gradiantAIapicallout(recId);
-               system.debug('returnResp'+returnResp);
-               errormsg.add(returnResp);
-               return errormsg;
-          }
-          else{
-              
-               return errormsg;
-          }
+            
+            if(errormsg.isempty()){
+                Integer returnResp =  gradiantAIapicallout(recId);
+                retrnres.response = returnResp;
+                retrnres.errormsg = new list<string>();
+                return JSON.serialize(retrnres);
+                
+            }
+            else{
+                retrnres.response = 0;
+                retrnres.errormsg = errormsg;
+                return JSON.serialize(retrnres);
+            }
+        }
+        catch(Exception e){
+            //throw all other exception message
+            throw new AuraHandledException(e.getMessage());
+        }
         
     }
-
-       public static void LogCalloutException(String request, Id OpportunityId , String e, String className, String methodName){
-            IntakeFormLog__c exc = new IntakeFormLog__c();
-            exc.Opportunity__c = OpportunityId;
-            exc.MethodName__c = methodName;
-            exc.Message__c = request;
-            exc.ClassName__c = className;
-            exc.Error__c = true;
-            exc.Source__c = 'Gradiant API';
-            exc.Stack_Trace__c =  e;
-            Database.insert(exc); 
+    // call the schedulable class after 15 mins and checks if gradiant Ai sent response back 
+    public static void sendCallbackNotificationlater(String oppId){
+        System.debug('startsceduleaction');
+        DateTime scheduledTime = DateTime.now().addMinutes(2);
+        String jobName = 'GradiantAIJob-'+oppId;
+        List<CronTrigger> ctList = [select Id,CronJobDetailId,CronJobDetail.Name, NextFireTime,PreviousFireTime,State,StartTime,EndTime,CronExpression, TimeZoneSidKey,OwnerId,TimesTriggered from CronTrigger where CronJobDetail.Name =:jobName];
+        if(ctList.isEmpty()){
+            String cronExpression = '0 ' + scheduledTime.minute() + ' ' + scheduledTime.hour() + ' ' + scheduledTime.day() + ' ' + scheduledTime.month() + ' ? ' + scheduledTime.year();            
+            System.schedule(jobName, cronExpression, new GradiantActionSchedulable(oppId));
         }
-    
-
+        
+    } 
 }
 
 
-
-
-**********************************apexcallback*******************************************************************************************8
+**********************************apexcallback*******************************************************************************************
 
 
 @RestResource(urlMapping='/gradiantAI/')
@@ -540,4 +551,34 @@ global class gradiantAICallback{
 
 
 
+**********************************GradiantActionSchedulable******************************************************************************
 
+// schedule class checks if gradiant AI sent response back to salesforce and creating MDSLQuoteException Log
+public without sharing class GradiantActionSchedulable implements schedulable  {
+    public String oppId;
+    // constructor to store opportunity record     
+    public GradiantActionSchedulable(String oppId) {
+        this.oppId = oppId;
+    }
+    public void execute(schedulableContext context) {
+        // This code will be executed after the specified delay
+        System.debug('called from gradiantai'+oppId);
+        String jobName = 'GradiantAIJob-'+oppId; 
+        DateTime lastfifthnmin =Datetime.now().addMinutes(-15);
+        List<GradientAI_Results__c> Grdiantreslst =  [select id from GradientAI_Results__c where CreatedDate > :lastfifthnmin];
+        
+        if(Grdiantreslst.isEmpty()){
+            MDSLQuoteException.LogAPIException('Gradiant AI to Salesforce Repsonse not recevied!', oppId, 'SF', 'Request Quote', 'GradiantAIController', 'gradiantAIapicalloutCallback', 'Gradiant AI to Salesforce Repsonse not recevied!', true, '', 'Gradiant AI to SF repsonse not recevied! Please contact support.', '', null);
+        }
+        // get the exisitng schedule job
+        CronTrigger ct = [select Id,CronJobDetailId,CronJobDetail.Name, NextFireTime,PreviousFireTime,State,StartTime,EndTime,CronExpression, TimeZoneSidKey,OwnerId,TimesTriggered from CronTrigger where CronJobDetail.Name =:jobName limit 1];
+        //Abort job
+        if(ct!=null){ 
+        System.abortJob(ct.Id);
+        }
+        // for(CronTrigger ct:ctList){
+        //     System.abortJob(ct.Id);
+        // }
+        
+    }
+}
