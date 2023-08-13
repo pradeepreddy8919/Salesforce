@@ -1,0 +1,26 @@
+trigger bulkifytriggerorderitem on OrderItem (after insert,after update, after delete, after undelete) { 
+    //First We check if we are in the right Trigger Context, BEFORE UPDATE of Account
+    if(Trigger.isinsert || Trigger.isUpdate || Trigger.isdelete || Trigger.isundelete){
+        set<Id> orderids = new set<Id>();
+        // Collect the parent IDs related to the child records being processed
+        for(OrderItem orditm : Trigger.new){
+            orderids.add(orditm.OrderId);            
+        }
+        // Collect additional parent IDs related to child records being deleted
+        for(OrderItem orditm : Trigger.old){
+            orderids.add(orditm.OrderId);            
+        }
+        // Query the parent records and their related child records' amounts
+        Map<Id, Order> ordersMap = new Map<Id, Order>([SELECT Id,Total_Amount__c, (SELECT Id, Net_Price__c FROM OrderItems) FROM Order WHERE Id IN :orderids]);
+        for (Order parent : ordersMap.values()) {
+            List<OrderItem> childRecords = parent.OrderItems;
+            Decimal totalAmount = 0;          
+            for (OrderItem child : childRecords) {
+                totalAmount += child.Net_Price__c;
+            }
+            parent.Total_Amount__c = totalAmount;
+        }       
+        // Update parent records
+        update ordersMap.values();       
+    }
+}
