@@ -1,0 +1,54 @@
+trigger BulkifyOpportunityTrigger on Opportunity (after insert, after update, after delete, after undelete) {
+    if(trigger.isAfter){
+        Set<id> accountids = new set<id>();
+        if(trigger.new !=null){
+            for(opportunity opp : trigger.new){
+                accountids.add(opp.accountId);
+                
+            }
+        }
+        if(trigger.old !=null){
+            for(opportunity opp : trigger.old){
+                accountids.add(opp.accountId);
+                
+            }
+        }
+        List<opportunity> opplist = [Select Id,accountId, Custom_Amount__c from opportunity where accountid IN : accountids ];
+        map<Id, Decimal> totalamount = new map<Id, Decimal>();
+        
+        for(opportunity opp:opplist ){
+            Decimal Amountval =0;  
+            system.debug('amount3'+opp.Custom_Amount__c); 
+            if(totalamount.containskey(opp.accountId)){   
+                system.debug('amount1'+totalAmount.get(opp.accountid));
+                system.debug('amount2'+opp.Custom_Amount__c); 
+                if(opp.Custom_Amount__c ==null){
+                    Amountval += totalAmount.get(opp.accountid);
+                }
+                else{
+                    Amountval += totalAmount.get(opp.accountid) + opp.Custom_Amount__c;
+                }
+                totalamount.put(opp.accountid, Amountval);
+            }
+            else{ 
+                if(opp.Custom_Amount__c ==null){
+                    totalamount.put(opp.accountid, 0);
+                }else{
+                    totalamount.put(opp.accountid, opp.Custom_Amount__c);
+                }
+            }        
+        }
+        list<schema.account> acclist = new  list<schema.account>();
+        for(Id setid: totalamount.keyset()){           
+            schema.Account acc = new schema.Account();
+            acc.Id = setid;
+            acc.Total_Custom_Amount__c = totalamount.get(setid);
+            acclist.add(acc);
+        }
+        system.debug('acclist'+acclist);
+        if(!acclist.isEmpty()){  
+            update acclist;
+        } 
+        
+    }
+}
