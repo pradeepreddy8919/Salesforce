@@ -1,0 +1,26 @@
+<!--
+  @description       : html file for custom file upload component
+  @author            : Pradeep Kumar Reddy Dhanireddy
+  @last modified on  : 11-11-2024
+  @last modified by  : Pradeep Kumar Reddy Dhanireddy
+  Modifications Log 
+  Ver   Date         Author                               Modification
+  1.0   11-11-2024   Pradeep Kumar Reddy Dhanireddy       Initial Version | Story Number
+-->
+<template>
+    <div class="slds-box slds-p-top_small" style="background-color: white; position: relative;">
+        <template if:true={showSpinner}>
+            <lightning-spinner alternative-text="Loading" size="medium" class="spinnerClass"></lightning-spinner>
+        </template>
+        <lightning-input type="file" label="Upload Book Image" onchange={handleFileUploaded} accept=".png, .jpg, .jpeg">
+        </lightning-input>
+        <template if:true={filesData}>
+            <template for:each={filesData} for:item="imgName" for:index="index">
+                {imgName.fileName}
+                <span key={imgName.fileName} data-id={index} onclick={removeReceiptImage} class="removeImage">x</span>
+                &nbsp;
+            </template>
+        </template>
+        <br />
+    </div>
+</template>

@@ -1,0 +1,34 @@
+<!--
+  @description       : html file for Book Header Dashboard
+  @author            : Pradeep Kumar Reddy Dhanireddy
+  @last modified on  : 11-11-2024
+  @last modified by  : Pradeep Kumar Reddy Dhanireddy
+  Modifications Log 
+  Ver   Date         Author                               Modification
+  1.0   11-11-2024   Pradeep Kumar Reddy Dhanireddy       Initial Version | Story Number
+-->
+<template>
+    <lightning-card title="Book Store Inventory Dashboard" icon-name="standard:price_books">
+        <div class="slds-grid slds-gutters slds-p-left_large">
+            <div class="slds-col gridClass">
+                <h1>
+                    <span>Total Book Count</span>
+                    <span class="slds-page-header__title slds-truncate" title={totalBooks}>{totalBooks}</span>
+                </h1>
+            </div>
+            <div class="slds-col gridClass">
+                <h1>
+                    <span>Available Stock</span>
+                    <span class="slds-page-header__title slds-truncate" title={availableStock}>{availableStock}</span>
+                </h1>
+            </div>
+            <div class="slds-col gridClass">
+                <h1>
+                    <span>Sales Performance</span>
+                    <span class="slds-page-header__title slds-truncate"
+                        title={salesPerformance}>{salesPerformance}</span>
+                </h1>
+            </div>
+        </div>
+    </lightning-card>
+</template>

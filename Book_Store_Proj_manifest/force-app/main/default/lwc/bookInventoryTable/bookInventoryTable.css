@@ -1,0 +1,13 @@
+.book-container {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.book-data {
+    flex: 1 1 calc(50% - 12px);
+}
+
+.main-container {
+    padding: 12px;
+}

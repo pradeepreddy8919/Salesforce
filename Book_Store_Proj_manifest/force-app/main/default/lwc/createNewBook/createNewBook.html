@@ -1,0 +1,35 @@
+<!--
+  @description       : html file for Book create/Edit Component
+  @author            : Pradeep Kumar Reddy Dhanireddy
+  @last modified on  : 11-11-2024
+  @last modified by  : Pradeep Kumar Reddy Dhanireddy
+  Modifications Log 
+  Ver   Date         Author                               Modification
+  1.0   11-11-2024   Pradeep Kumar Reddy Dhanireddy       Initial Version | Story Number
+-->
+<template>
+    <lightning-card title={headerLabel} icon-name="standard:pricebook">
+
+        <div if:true={isSpinner}>
+            <lightning-spinner alternative-text="Page is loading..."></lightning-spinner>
+        </div>
+            <lightning-record-edit-form object-api-name="Book__c" record-id={recordId} onsuccess={handleSuccess}
+                onsubmit={handleSubmit}>
+                <div class="slds-p-around_medium">
+                    <lightning-input-field field-name="Name" required> </lightning-input-field>
+                    <lightning-input-field field-name="Title__c" required> </lightning-input-field>
+                    <lightning-input-field field-name="Author__c" required> </lightning-input-field>
+                    <lightning-input-field field-name="Genre__c" required> </lightning-input-field>
+                    <lightning-input-field field-name="Price__c" required> </lightning-input-field>
+                    <lightning-input-field field-name="Availability__c" required> </lightning-input-field>
+                    <lightning-input-field field-name="Stock_Quantity__c" required> </lightning-input-field>
+                    <c-custom-file-upload record-id={recordId} onuploaded={handleUploaded}></c-custom-file-upload>
+                </div>
+                <div class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" aria-label="Cancel and close"
+                        onclick={handleCancel}>{cancelLabel}</button>
+                    <button class="slds-button slds-button_brand" type="submit">{saveLabel}</button>
+                </div>
+            </lightning-record-edit-form>
+    </lightning-card>
+</template>

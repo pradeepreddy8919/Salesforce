@@ -1,0 +1,31 @@
+<!--
+  @description       : html file for Book Inventory Table
+  @author            : Pradeep Kumar Reddy Dhanireddy
+  @last modified on  : 11-11-2024
+  @last modified by  : Pradeep Kumar Reddy Dhanireddy
+  Modifications Log 
+  Ver   Date         Author                               Modification
+  1.0   11-11-2024   Pradeep Kumar Reddy Dhanireddy       Initial Version | Story Number
+-->
+<template>
+    <lightning-card>
+        <template if:true={booksFound}>
+            <div class="slds-scrollable_y main-container">
+                <lightning-layout class="book-container">
+                    <template for:each={booksData} for:item="book">
+                        <lightning-layout-item key={book.id} size="12" small-device-size="6" medium-device-size="4"
+                            large-device-size="6" class="book-data">
+                            <c-booktile-cmp book={book} onparentrefresh={refreshTable}>
+                            </c-booktile-cmp>
+                        </lightning-layout-item>
+                    </template>
+                </lightning-layout>
+            </div>
+        </template>
+        <template if:false={booksFound}>
+            <div class="demo-only" style="padding:0.5rem;background:#16325c">
+                <div class="slds-text-color_inverse slds-text-align_center">No Books in the Inventory</div>
+            </div>
+        </template>
+    </lightning-card>
+</template>
